@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('coordinateurs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string(column: 'telephone')->nullable();
-            $table->string('adresse')->nullable();
             $table->string('photo_path')->nullable();
 
             $table->timestamps();

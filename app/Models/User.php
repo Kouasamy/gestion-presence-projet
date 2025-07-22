@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -17,29 +18,20 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
     protected $fillable = [
-        'name',
+        'nom',
         'email',
         'password',
         'role_id',
         'photo_path',
 
     ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class);
-    }
-    public function etudiant()
+   public function role()
+{
+    return $this->belongsTo(Role::class);
+}
+     public function etudiant()
     {
         return $this->hasOne(Etudiant::class);
     }
@@ -55,6 +47,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(Coordinateur::class);
     }
+
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+
+
 
     /**
      * Get the attributes that should be cast.
