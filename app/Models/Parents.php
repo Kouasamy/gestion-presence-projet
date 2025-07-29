@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Parents extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
-        'telephone',
-        'adresse',
         'photo_path'
     ];
     public function user()
@@ -17,7 +17,8 @@ class Parents extends Model
         return $this->belongsTo(User::class);
     }
     public function etudiants()
-    {
-        return $this->belongsToMany(Etudiant::class, 'parent_etudiant');
-    }
+{
+    return $this->belongsToMany(Etudiant::class, 'parent_etudiant', 'parent_id', 'etudiant_id');
+}
+
 }

@@ -15,4 +15,8 @@ class Classe extends Model
     {
         return $this->hasMany(Seance::class);
     }
+    public function etudiants()
+{
+    return $this->belongsToMany(Etudiant::class, 'etudiant_classe');
+}
 }

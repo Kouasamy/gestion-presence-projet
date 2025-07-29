@@ -1,181 +1,81 @@
-<!DOCTYPE html>
-<html lang="fr">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Formulaires de cours</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <style>
-        /* (styles inchangés) */
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+@section('title', 'Gestion des cours')
 
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: white;
-        }
-
-        .logo {
-            height: 50px;
-        }
-
-        .nav-center {
-            background-color: #2f3357;
-            border-radius: 30px;
-            padding: 8px 15px;
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-
-        .nav-center .icon {
-            width: 24px;
-            height: 24px;
-            fill: white;
-            cursor: pointer;
-        }
-
-        .nav-center .icon.highlighted {
-            background-color: #d81e4e;
-            border-radius: 50%;
-            padding: 5px;
-        }
-
-        .right-icons {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .right-icons .icon {
-            width: 24px;
-            height: 24px;
-            fill: #2f3357;
-            cursor: pointer;
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 60px;
-            padding: 40px 20px;
-        }
-
-        .form-card {
-            background-color: #35385c;
-            border-radius: 20px;
-            padding: 40px 30px 50px 30px;
-            width: 320px;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-card a.top-link {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 12px;
-            color: #c1c9e6;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .form-card input[type="text"] {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: none;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .form-card button {
-            margin-top: 25px;
-            background-color: #d81e4e;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            padding: 10px 25px;
-            font-size: 13px;
-            cursor: pointer;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            transition: background-color 0.3s ease;
-        }
-
-        .form-card button:hover {
-            background-color: #b71c3f;
-        }
-
-        footer {
-            font-size: 12px;
-            color: #666;
-            padding: 15px 0;
-            width: 100%;
-            text-align: center;
-            border-top: 1px solid #eee;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background: #fff;
-        }
-    </style>
-</head>
-
-<body>
-    <header>
-        <img src="https://i.ibb.co/3cQ7Q7Z/ifran-logo.png" alt="IFRAN Logo" class="logo" />
-    </header>
-
-    <main>
-
-        <form class="form-card" action="{{ route('admin.cours.store') }}" method="POST">
-            @csrf
-            <a href="{{ route('admin.cours.liste') }}" class="top-link" title="Liste des cours">
+@section('content')
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="form-header">
+            <h2 class="text-white text-xl">Ajouter un cours</h2>
+            <a href="{{ route('admin.cours.index') }}">
                 Liste des cours
-                <svg viewBox="0 0 24 24">
-                    <path d="M10 17l5-5-5-5v10z" />
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </a>
-            <input type="text" name="nom_matiere" placeholder="Nom du cours" required />
-            <button type="submit">Ajouter un cours</button>
-        </form>
+        </div>
 
+        @if ($errors->any())
+            <div class="form-error">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <form class="form-card" action="{{ route('admin.typecours.store') }}" method="POST">
-            @csrf
-            <a href="{{ route('admin.typecours.liste') }}" class="top-link" title="Liste des types de cours">
-                Liste des types de cours
-                <svg viewBox="0 0 24 24">
-                    <path d="M10 17l5-5-5-5v10z" />
-                </svg>
-            </a>
-            <input type="text" name="nom_type_cours" placeholder="Nom du type de cours" required />
-            <button type="submit">Ajouter un type de cours</button>
-        </form>
-    </main>
+        @if (session('success'))
+            <div class="form-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    <footer>
-        © Copyright 2024 | Tous droits réservés | IFRAN
-    </footer>
-</body>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Formulaire pour ajouter un cours -->
+            <div>
+                <h3 class="text-white text-lg mb-4">Nouveau cours</h3>
+                <form action="{{ route('admin.cours.store') }}" method="POST">
+                    @csrf
+                    <div>
+                        <label for="nom_matiere" class="form-label">Nom du cours</label>
+                        <input type="text"
+                               name="nom_matiere"
+                               id="nom_matiere"
+                               class="form-input"
+                               placeholder="Entrez le nom du cours"
+                               value="{{ old('nom_matiere') }}"
+                               required>
+                    </div>
 
-</html>
+                    <button type="submit" class="form-button">
+                        Ajouter le cours
+                    </button>
+                </form>
+            </div>
+
+            <!-- Formulaire pour ajouter un type de cours -->
+            <div>
+                <h3 class="text-white text-lg mb-4">Nouveau type de cours</h3>
+                <form action="{{ route('admin.cours.types.store') }}" method="POST">
+                    @csrf
+                    <div>
+                        <label for="nom_type_cours" class="form-label">Nom du type de cours</label>
+                        <input type="text"
+                               name="nom_type_cours"
+                               id="nom_type_cours"
+                               class="form-input"
+                               placeholder="Entrez le type de cours"
+                               value="{{ old('nom_type_cours') }}"
+                               required>
+                    </div>
+
+                    <button type="submit" class="form-button">
+                        Ajouter le type
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

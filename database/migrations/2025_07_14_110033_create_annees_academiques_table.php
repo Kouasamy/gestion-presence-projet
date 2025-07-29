@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('annees_academiques', function (Blueprint $table) {
             $table->id();
-            $table->unsignedSmallInteger('annee')->unique();
+            $table->string('annee')->unique();
             $table->timestamps();
         });
     }

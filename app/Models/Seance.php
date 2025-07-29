@@ -12,35 +12,48 @@ class Seance extends Model
         'enseignant_id',
         'type_cours_id',
         'statut_seance_id',
-        'coordonateur_id',
-        'date',
+        'coordinateur_id',
+        'date_seance',
         'heure_debut',
         'heure_fin',
     ];
+
+    protected $casts = [
+        'date_seance' => 'date',
+        'heure_debut' => 'datetime',
+        'heure_fin' => 'datetime',
+    ];
+
     public function matiere()
     {
         return $this->belongsTo(Matiere::class);
     }
+
     public function enseignant()
     {
         return $this->belongsTo(Enseignant::class);
     }
+
     public function classe()
     {
         return $this->belongsTo(Classe::class);
     }
+
     public function typeCours()
     {
         return $this->belongsTo(TypeCours::class);
     }
+
     public function statutSeance()
     {
         return $this->belongsTo(StatutSeance::class);
     }
+
     public function coordinateur()
     {
         return $this->belongsTo(Coordinateur::class);
     }
+
     public function presences()
     {
         return $this->hasMany(Presence::class);

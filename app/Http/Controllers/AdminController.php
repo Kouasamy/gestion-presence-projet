@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnneeAcademique;
 use App\Models\Classe;
 use App\Models\Coordinateur;
 use App\Models\Enseignant;
@@ -9,6 +10,7 @@ use App\Models\Etudiant;
 use App\Models\Matiere;
 use App\Models\Parents;
 use App\Models\Role;
+use App\Models\Semestre;
 use App\Models\StatutPresence;
 use App\Models\StatutSeance;
 use App\Models\TypeCours;
@@ -24,14 +26,19 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    public function indexUsersByRole($roleName)
-    {
+   public function indexUsersByRole($roleName = null)
+{
+    if ($roleName) {
         $users = User::whereHas('role', function ($query) use ($roleName) {
             $query->where('nom_role', $roleName);
         })->get();
-
-        return view("admin.gestion{$roleName}", compact('users'));
+    } else {
+        $users = User::all();
     }
+
+    return view("admin.listeUsers", compact('users'));
+}
+
 
     public function createUserForm()
     {
@@ -103,7 +110,13 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', $message);
     }
+     public function destroyUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
 
+        return redirect()->route('admin.user.index')->with('success', 'Utilisateur supprimé avec succès.');
+    }
 
     public function editUserForm(User $user)
     {
@@ -114,7 +127,7 @@ class AdminController extends Controller
     public function indexRoles()
     {
         $roles = Role::all();
-        return view('admin.formRole', compact('roles'));
+        return view('admin.listeRole', compact('roles'));
     }
 
     // Formulaire de création de rôle
@@ -134,7 +147,8 @@ class AdminController extends Controller
             'nom_role' => $request->nom_role,
         ]);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle créé avec succès.');
+        return redirect()->route('admin.roles.index')
+            ->with('success', 'Rôle créé avec succès.');
     }
 
     // Formulaire de modification d’un rôle
@@ -191,7 +205,8 @@ class AdminController extends Controller
             'nom_matiere' => $request->nom_matiere
         ]);
 
-        return back()->with('success', 'Cours ajouté avec succès.');
+        return redirect()->route('admin.cours.index')
+            ->with('success', 'Cours ajouté avec succès.');
     }
     public function storeTypeCours(Request $request)
     {
@@ -203,7 +218,8 @@ class AdminController extends Controller
             'nom_type_cours' => $request->nom_type_cours
         ]);
 
-        return back()->with('success', 'Type de cours ajouté avec succès.');
+        return redirect()->route('admin.cours.index')
+            ->with('success', 'Type de cours ajouté avec succès.');
     }
     public function editCours($id)
     {
@@ -222,7 +238,8 @@ class AdminController extends Controller
             'nom_matiere' => $request->nom_matiere
         ]);
 
-        return redirect()->route('admin.cours.liste')->with('success', 'Cours modifié.');
+        // Correction du nom de la route
+        return redirect()->route('admin.cours.index')->with('success', 'Cours modifié.');
     }
 
     public function editTypeCours($id)
@@ -242,7 +259,8 @@ class AdminController extends Controller
             'nom_type_cours' => $request->nom_type_cours
         ]);
 
-        return redirect()->route('admin.cours.liste')->with('success', 'Type de cours modifié.');
+        // Correction du nom de la route
+        return redirect()->route('admin.cours.index')->with('success', 'Type de cours modifié.');
     }
     public function destroyCours($id)
     {
@@ -281,7 +299,8 @@ class AdminController extends Controller
             'nom_classe' => $request->nom_classe,
         ]);
 
-        return redirect()->route('classe.liste')->with('success', 'Classe ajoutée avec succès.');
+        return redirect()->route('admin.classes.index')
+            ->with('success', 'Classe ajoutée avec succès.');
     }
 
 
@@ -315,6 +334,7 @@ class AdminController extends Controller
         return redirect()->route('classe.liste')->with('success', 'Classe supprimée.');
     }
 
+    // CRUD pour les statuts de séance
     public function listeStatutSeance()
     {
         $statuts = StatutSeance::all();
@@ -338,7 +358,8 @@ class AdminController extends Controller
             'nom_seance' => $request->nom_seance,
         ]);
 
-        return redirect()->route('statutseance.liste')->with('success', 'Statut de séance ajouté avec succès.');
+        return redirect()->route('admin.statut-seances.index')
+            ->with('success', 'Statut de séance ajouté avec succès.');
     }
 
 
@@ -373,58 +394,168 @@ class AdminController extends Controller
     }
 
     public function indexStatutPresence()
+    {
+        $statutPresences = StatutPresence::all();
+        return view('admin.listeStatutPresence', compact('statutPresences'));
+    }
+
+
+    public function createStatutPresence()
+    {
+        return view('admin.formStatutPresence');
+    }
+
+
+    public function storeStatutPresence(Request $request)
+    {
+        $request->validate([
+            'nom_statut_presence' => 'required|string|max:255',
+        ]);
+
+        StatutPresence::create([
+            'nom_statut_presence' => $request->nom_statut_presence,
+        ]);
+
+        return redirect()->route('admin.statut-presences.index')
+            ->with('success', 'Statut présence ajouté.');
+    }
+
+
+    public function editStatutPresence($id)
+    {
+        $statutPresence = StatutPresence::findOrFail($id);
+        return view('admin.editStatutPresence', compact('statutPresence'));
+    }
+
+
+    public function updateStatutPresence(Request $request, $id)
+    {
+        $request->validate([
+            'nom_statut_presence' => 'required|string|max:255',
+        ]);
+
+        $statutPresence = StatutPresence::findOrFail($id);
+        $statutPresence->update([
+            'nom_statut_presence' => $request->nom_statut_presence,
+        ]);
+
+        // Correction du nom de la route
+        return redirect()->route('admin.statut-presences.index')->with('success', 'Statut présence modifié.');
+    }
+
+
+    public function destroyStatutPresence($id)
+    {
+        StatutPresence::findOrFail($id)->delete();
+        return redirect()->route('admin.statut-presence.index')->with('success', 'Statut présence supprimé.');
+    }
+
+    //CRUD pour les années académiques
+   public function indexAnnee()
 {
-    $statutPresences = StatutPresence::all();
-    return view('admin.listeStatutPresence', compact('statutPresences'));
+    $annees = AnneeAcademique::withCount('semestres')->get();
+    return view('admin.listeAnneeAcademique', compact('annees'));
+}
+
+public function createAnnee()
+{
+    return view('admin.formAnneeAcademique');
+}
+
+public function storeAnnee(Request $request)
+{
+    $request->validate(['annee' => 'required|string']);
+    AnneeAcademique::create($request->only('annee'));
+
+    return redirect()->route('admin.annees.create')->with('success', 'Année créée.');
+}
+
+public function editAnnee($id)
+{
+    $annee = AnneeAcademique::findOrFail($id);
+    return view('admin.editAnneeAcademique', compact('annee'));
+}
+
+public function updateAnnee(Request $request, $id)
+{
+    $request->validate(['annee' => 'required|string']);
+    $annee = AnneeAcademique::findOrFail($id);
+    $annee->update($request->only('annee'));
+
+    return redirect()->route('admin.annees.index')->with('success', 'Année mise à jour.');
+}
+
+public function destroyAnnee($id)
+{
+    $annee = AnneeAcademique::findOrFail($id);
+    $annee->delete();
+
+    return redirect()->route('admin.annees.index')->with('success', 'Année supprimée.');
 }
 
 
-public function createStatutPresence()
+
+
+
+    //CRUD pour les semestres
+    // Affiche la liste des semestres
+    public function indexSemestre()
 {
-    return view('admin.formStatutPresence');
+    $semestres = Semestre::with('anneeAcademique')->get();
+    return view('admin.listeSemestres', compact('semestres'));
 }
 
+public function createSemestre()
+{
+    $annees = AnneeAcademique::all();
+    return view('admin.formSemestres', compact('annees'));
+}
 
-public function storeStatutPresence(Request $request)
+public function storeSemestre(Request $request)
 {
     $request->validate([
-        'nom_statut_presence' => 'required|string|max:255',
+        'nom' => 'required|string',
+        'date_debut_semestre' => 'required|date',
+        'date_fin_semestre' => 'required|date|after_or_equal:date_debut_semestre',
+        'annees_academiques_id' => 'required|exists:annees_academiques,id',
     ]);
 
-    StatutPresence::create([
-        'nom_statut_presence' => $request->nom_statut_presence,
-    ]);
+    Semestre::create($request->all());
 
-    return redirect()->route('admin.statut-presence.index')->with('success', 'Statut présence ajouté.');
+    return redirect()->route('admin.semestres.index')
+            ->with('success', 'Semestre créé avec succès.');
 }
 
-
-public function editStatutPresence($id)
+public function editSemestre($id)
 {
-    $statutPresence = StatutPresence::findOrFail($id);
-    return view('admin.editStatutPresence', compact('statutPresence'));
+    $semestre = Semestre::findOrFail($id);
+    $annees = AnneeAcademique::all();
+    return view('admin.editSemestres', compact('semestre', 'annees'));
 }
 
-
-public function updateStatutPresence(Request $request, $id)
+public function updateSemestre(Request $request, $id)
 {
     $request->validate([
-        'nom_statut_presence' => 'required|string|max:255',
+        'nom' => 'required|string',
+        'date_debut_semestre' => 'required|date',
+        'date_fin_semestre' => 'required|date|after_or_equal:date_debut_semestre',
+        'annees_academiques_id' => 'required|exists:annees_academiques,id',
     ]);
 
-    $statutPresence = StatutPresence::findOrFail($id);
-    $statutPresence->update([
-        'nom_statut_presence' => $request->nom_statut_presence,
-    ]);
+    $semestre = Semestre::findOrFail($id);
+    $semestre->update($request->all());
 
-    return redirect()->route('admin.statut-presence.index')->with('success', 'Statut présence modifié.');
+    return redirect()->route('admin.semestres.index')
+            ->with('success', 'Semestre mis à jour avec succès.');
 }
 
-
-public function destroyStatutPresence($id)
+public function destroySemestre($id)
 {
-    StatutPresence::findOrFail($id)->delete();
-    return redirect()->route('admin.statut-presence.index')->with('success', 'Statut présence supprimé.');
+    $semestre = Semestre::findOrFail($id);
+    $semestre->delete();
+
+    return redirect()->route('admin.semestres.index')
+            ->with('success', 'Semestre supprimé avec succès.');
 }
 
 }

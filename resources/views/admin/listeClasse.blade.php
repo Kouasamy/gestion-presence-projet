@@ -1,63 +1,72 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Liste des Classes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .btn-icon {
-            background-color: #2f3357;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+@extends('layouts.admin')
 
-        .btn-icon:hover {
-            background-color: #1d203c;
-        }
-    </style>
-</head>
-<body class="p-4">
+@section('title', 'Liste des Classes')
 
-    <!-- Bouton de retour -->
-    <a href="{{ route('admin.classe.create') }}" class="btn-icon mb-4">
-        <i class="fas fa-arrow-left"></i>
-        Retour à l’ajout
-    </a>
+@section('content')
+<div class="py-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="p-6 bg-white border-b border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        🏫 Liste des Classes
+                    </h2>
+                    <a href="{{ route('admin.classes.create') }}" class="custom-button">
+                        <i class="fas fa-plus mr-2"></i> Ajouter une classe
+                    </a>
+                </div>
 
-    <h2 class="mb-4">🏫 Liste des classes</h2>
+                @if(session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nom de la classe</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($classes as $classe)
-                <tr>
-                    <td>{{ $classe->id }}</td>
-                    <td>{{ $classe->nom_classe }}</td>
-                    <td>
-                        <a href="{{ route('admin.classe.edit', $classe->id) }}" class="btn btn-sm btn-warning">Modifier</a>
-                        <form action="{{ route('admin.classe.destroy', $classe->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette classe ?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-</body>
-</html>
+                <div class="overflow-x-auto">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                              
+                                <th>Nom de la classe</th>
+                                <th>Nombre d'étudiants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($classes as $classe)
+                                <tr>
+                                    
+                                    <td>{{ $classe->nom_classe }}</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ $classe->etudiants_count ?? 0 }} étudiants
+                                        </span>
+                                    </td>
+                                    <td class="flex gap-2">
+                                        <a href="{{ route('admin.classes.edit', $classe->id) }}" 
+                                           class="custom-button bg-yellow-500 hover:bg-yellow-600">
+                                            <i class="fas fa-edit mr-2"></i>
+                                            Modifier
+                                        </a>
+                                        <form action="{{ route('admin.classes.destroy', $classe->id) }}" 
+                                              method="POST" 
+                                              class="inline-block"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette classe ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="custom-button bg-red-500 hover:bg-red-600">
+                                                <i class="fas fa-trash-alt mr-2"></i>
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

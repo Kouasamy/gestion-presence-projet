@@ -1,15 +1,16 @@
 <?php
 
+use App\Http\Controllers\CoordinateurController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EtudiantController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-
+// Route d'accueil avec redirection selon le rôle
 Route::get('/', function () {
     if (Auth::check()) {
         $role = Auth::user()->role->nom_role ?? null;
-
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),
             'etudiant' => redirect()->route('etudiant.dashboard'),
@@ -19,98 +20,186 @@ Route::get('/', function () {
             default => redirect('/login'),
         };
     }
-
     return redirect()->route('login');
 });
-// Route pour les admins
+
+// Routes pour l'administrateur
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    // Vue dynamique selon rôle
-    //Gestion des utilisateurs par rôle
-    Route::get('/{role}/liste', [AdminController::class, 'indexUsersByRole'])->name('role.liste');
-
-    // Formulaire générique
-    Route::get('/utilisateur/create', [AdminController::class, 'createUserForm'])->name('user.create');
-    Route::post('/utilisateur/store', [AdminController::class, 'storeUser'])->name('user.store');
+    // Gestion des utilisateurs
+    Route::prefix('users')->name('user.')->group(function () {
+        Route::get('/', [AdminController::class, 'indexUsersByRole'])->name('index');
+        Route::get('/create', [AdminController::class, 'createUserForm'])->name('create');
+        Route::post('/', [AdminController::class, 'storeUser'])->name('store');
+        Route::get('/{user}/edit', [AdminController::class, 'editUserForm'])->name('edit');
+        Route::put('/{user}', [AdminController::class, 'updateUser'])->name('update');
+        Route::delete('/{user}', [AdminController::class, 'destroyUser'])->name('destroy');
+    });
 
     // Gestion des rôles
-    Route::get('/roles', [AdminController::class, 'indexRoles'])->name('roles.index');
-    Route::get('/roles/create', [AdminController::class, 'createRole'])->name('roles.create');
-    Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
-    Route::get('/roles/{id}/edit', [AdminController::class, 'editRole'])->name('roles.edit');
-    Route::put('/roles/{id}', [AdminController::class, 'updateRole'])->name('roles.update');
-    Route::delete('/roles/{id}', [AdminController::class, 'destroyRole'])->name('roles.destroy');
+    Route::prefix('roles')->name('role.')->group(function () {
+        Route::get('/', [AdminController::class, 'indexRoles'])->name('index');
+        Route::get('/create', [AdminController::class, 'createRole'])->name('create');
+        Route::post('/', [AdminController::class, 'storeRole'])->name('store');
+        Route::get('/{role}/edit', [AdminController::class, 'editRole'])->name('edit');
+        Route::put('/{role}', [AdminController::class, 'updateRole'])->name('update');
+        Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
+    });
 
-    // Cours (matières)
-    Route::get('/cours', [AdminController::class, 'indexCours'])->name('cours.index'); // Formulaire
-    Route::post('/cours/store', [AdminController::class, 'storeCours'])->name('cours.store');
-    Route::get('/cours/liste', [AdminController::class, 'listeCours'])->name('cours.liste');
-    Route::get('/cours/{id}/edit', [AdminController::class, 'editCours'])->name('cours.edit');
-    Route::put('/cours/{id}', [AdminController::class, 'updateCours'])->name('cours.update');
-    Route::delete('/cours/{id}', [AdminController::class, 'destroyCours'])->name('cours.destroy');
+    // Gestion des cours et types de cours
+    Route::prefix('cours')->name('cours.')->group(function () {
+        Route::get('/', [AdminController::class, 'listeCours'])->name('index');
+        Route::get('/create', [AdminController::class, 'indexCours'])->name('create');
+        Route::post('/', [AdminController::class, 'storeCours'])->name('store');
+        Route::get('/{cours}/edit', [AdminController::class, 'editCours'])->name('edit');
+        Route::put('/{cours}', [AdminController::class, 'updateCours'])->name('update');
+        Route::delete('/{cours}', [AdminController::class, 'destroyCours'])->name('destroy');
 
-    // Type de cours
-    Route::post('/type-cours/store', [AdminController::class, 'storeTypeCours'])->name('typecours.store');
-    Route::get('/type-cours/{id}/edit', [AdminController::class, 'editTypeCours'])->name('typecours.edit');
-    Route::put('/type-cours/{id}', [AdminController::class, 'updateTypeCours'])->name('typecours.update');
-    Route::delete('/type-cours/{id}', [AdminController::class, 'destroyTypeCours'])->name('typecours.destroy');
+        // Types de cours
+        Route::prefix('types')->name('types.')->group(function () {
+            Route::post('/', [AdminController::class, 'storeTypeCours'])->name('store');
+            Route::get('/{type}/edit', [AdminController::class, 'editTypeCours'])->name('edit');
+            Route::put('/{type}', [AdminController::class, 'updateTypeCours'])->name('update');
+            Route::delete('/{type}', [AdminController::class, 'destroyTypeCours'])->name('destroy');
+        });
+    });
 
-    //Classes
-    Route::get('/classes', [AdminController::class, 'listeClasse'])->name('classe.liste');
-    Route::get('/classes/create', [AdminController::class, 'createClasse'])->name('classe.create');
-    Route::post('/classes', [AdminController::class, 'storeClasse'])->name('classe.store');
-    Route::get('/classes/{id}/edit', [AdminController::class, 'editClasse'])->name('classe.edit');
-    Route::put('/classes/{id}', [AdminController::class, 'updateClasse'])->name('classe.update');
-    Route::delete('/classes/{id}', [AdminController::class, 'destroyClasse'])->name('classe.destroy');
+    // Gestion des classes
+    Route::prefix('classes')->name('classes.')->group(function () {
+        Route::get('/', [AdminController::class, 'listeClasse'])->name('index');
+        Route::get('/create', [AdminController::class, 'createClasse'])->name('create');
+        Route::post('/', [AdminController::class, 'storeClasse'])->name('store');
+        Route::get('/{classe}/edit', [AdminController::class, 'editClasse'])->name('edit');
+        Route::put('/{classe}', [AdminController::class, 'updateClasse'])->name('update');
+        Route::delete('/{classe}', [AdminController::class, 'destroyClasse'])->name('destroy');
+    });
 
-    // Statut Présence
-    Route::get('/statutpresence', [AdminController::class, 'listeStatutPresence'])->name('statutpresence.liste');
-    Route::get('/statutpresence/create', [AdminController::class, 'createStatutPresence'])->name('statutpresence.create');
-    Route::post('/statutpresence', [AdminController::class, 'storeStatutPresence'])->name('statutpresence.store');
-    Route::get('/statutpresence/{id}/edit', [AdminController::class, 'editStatutPresence'])->name('statutpresence.edit');
-    Route::put('/statutpresence/{id}', [AdminController::class, 'updateStatutPresence'])->name('statutpresence.update');
-    Route::delete('/statutpresence/{id}', [AdminController::class, 'destroyStatutPresence'])->name('statutpresence.destroy');
+    // Gestion des statuts de séance
+    Route::prefix('statut-seances')->name('statut-seances.')->group(function () {
+        Route::get('/', [AdminController::class, 'listeStatutSeance'])->name('index');
+        Route::get('/create', [AdminController::class, 'createStatutSeance'])->name('create');
+        Route::post('/', [AdminController::class, 'storeStatutSeance'])->name('store');
+        Route::get('/{statut}/edit', [AdminController::class, 'editStatutSeance'])->name('edit');
+        Route::put('/{statut}', [AdminController::class, 'updateStatutSeance'])->name('update');
+        Route::delete('/{statut}', [AdminController::class, 'destroyStatutSeance'])->name('destroy');
+    });
+
+    // Gestion des statuts de présence
+    Route::prefix('statut-presences')->name('statut-presences.')->group(function () {
+        Route::get('/', [AdminController::class, 'indexStatutPresence'])->name('index');
+        Route::get('/create', [AdminController::class, 'createStatutPresence'])->name('create');
+        Route::post('/', [AdminController::class, 'storeStatutPresence'])->name('store');
+        Route::get('/{statut}/edit', [AdminController::class, 'editStatutPresence'])->name('edit');
+        Route::put('/{statut}', [AdminController::class, 'updateStatutPresence'])->name('update');
+        Route::delete('/{statut}', [AdminController::class, 'destroyStatutPresence'])->name('destroy');
+    });
+
+    // Gestion des années académiques
+    Route::prefix('annees-academiques')->name('annees.')->group(function () {
+        Route::get('/', [AdminController::class, 'indexAnnee'])->name('index');
+        Route::get('/create', [AdminController::class, 'createAnnee'])->name('create');
+        Route::post('/', [AdminController::class, 'storeAnnee'])->name('store');
+        Route::get('/{annee}/edit', [AdminController::class, 'editAnnee'])->name('edit');
+        Route::put('/{annee}', [AdminController::class, 'updateAnnee'])->name('update');
+        Route::delete('/{annee}', [AdminController::class, 'destroyAnnee'])->name('destroy');
+    });
+
+    // Gestion des semestres
+    Route::prefix('semestres')->name('semestres.')->group(function () {
+        Route::get('/', [AdminController::class, 'indexSemestre'])->name('index');
+        Route::get('/create', [AdminController::class, 'createSemestre'])->name('create');
+        Route::post('/', [AdminController::class, 'storeSemestre'])->name('store');
+        Route::get('/{semestre}/edit', [AdminController::class, 'editSemestre'])->name('edit');
+        Route::put('/{semestre}', [AdminController::class, 'updateSemestre'])->name('update');
+        Route::delete('/{semestre}', [AdminController::class, 'destroySemestre'])->name('destroy');
+    });
 });
 
+// Routes pour le coordinateur
+Route::middleware(['auth', 'isCoordinateur'])->prefix('coordinateur')->name('coordinateur.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [CoordinateurController::class, 'dashboard'])->name('dashboard');
+
+    // Gestion des séances
+    Route::prefix('seances')->name('seances.')->group(function () {
+        Route::get('/', [CoordinateurController::class, 'index'])->name('index');
+        Route::get('/{seance}/edit', [CoordinateurController::class, 'edit'])->name('edit');
+        Route::put('/{seance}', [CoordinateurController::class, 'update'])->name('update');
+        Route::delete('/{seance}', [CoordinateurController::class, 'destroy'])->name('destroy');
+
+        // Gestion des reports et annulations
+        Route::post('/coordinateur/seances/{seance}/reporter', [CoordinateurController::class, 'reporterSeance'])->name('coordinateur.seances.reporter');
+        Route::post('/coordinateur/seances/{seance}/annuler', [CoordinateurController::class, 'annulerSeance'])->name('coordinateur.seances.annuler');
+    });
+    // Statistiques
+    Route::get('/statistiques', [CoordinateurController::class, 'statistiques'])->name('statistiques');
 
 
-// Route pour les étudiants
-Route::middleware(['auth', 'isEtudiant'])->group(function () {
-    Route::get('/etudiant/dashboard', function () {
-        return view('etudiant.dashboardEtudiant');
-    })->name('etudiant.dashboard');
+    // Gestion des présences
+    Route::prefix('presences')->name('presences.')->group(function () {
+        Route::get('/', [CoordinateurController::class, 'indexPresences'])->name('index');
+        Route::get('/seance/{seance}', [CoordinateurController::class, 'presenceForm'])->name('form');
+        Route::post('/seance/{seance}', [CoordinateurController::class, 'storePresence'])->name('store');
+    });
+
+    // Gestion des absences et justifications
+    Route::prefix('absences')->name('absences.')->group(function () {
+        Route::get('/', [CoordinateurController::class, 'indexAbsences'])->name('index');
+        Route::get('/{absence}/details', [CoordinateurController::class, 'showJustificationDetails'])->name('details');
+        Route::post('/{absence}/justify', [CoordinateurController::class, 'justifyAbsence'])->name('justify');
+    });
+
+    // Gestion des justifications
+    Route::prefix('justifications')->name('justification.')->group(function () {
+        Route::get('/create/{presence}', [CoordinateurController::class, 'createJustification'])->name('create');
+        Route::post('/store/{presence}', [CoordinateurController::class, 'storeJustification'])->name('store');
+        Route::get('/{absence}/details', [CoordinateurController::class, 'showJustificationDetails'])->name('details');
+    });
+
+    // Gestion de l'emploi du temps
+    Route::prefix('emploi-du-temps')->name('emploiDuTemps.')->group(function () {
+        Route::get('/', [CoordinateurController::class, 'indexEmploiDuTemps'])->name('index');
+        Route::get('/create', [CoordinateurController::class, 'createEmploiDuTemps'])->name('create');
+        Route::post('/', [CoordinateurController::class, 'storeEmploiDuTemps'])->name('store');
+        Route::get('/{emploi}/edit', [CoordinateurController::class, 'editEmploiDuTemps'])->name('edit');
+        Route::put('/{emploi}', [CoordinateurController::class, 'updateEmploiDuTemps'])->name('update');
+        Route::get('/{classe}', [CoordinateurController::class, 'emploiDuTempsParClasse'])->name('show');
+    });
+
+    // Liste des étudiants
+    Route::get('/etudiants', [CoordinateurController::class, 'listeEtudiants'])->name('etudiants.index');
+    // Nouvelle route pour afficher le formulaire d'assignation
+    Route::get('/etudiants/{etudiant}/assigner-classe', [CoordinateurController::class, 'formAssignerClasse'])->name('etudiants.formAssignerClasse');
+    // Route POST existante pour traiter l'assignation
+    Route::post('/etudiants/{etudiant}/assigner-classe', [CoordinateurController::class, 'assignerClasse'])->name('etudiants.assignerClasse');
+    Route::post('/etudiants/{etudiant}/desinscrire-classe/{classe}', [CoordinateurController::class, 'desinscrireClasse'])->name('etudiants.desinscrireClasse');
 });
 
-
-
-
-// Route pour les parents
-Route::middleware(['auth', 'isParent'])->group(function () {
-    Route::get('/parent/dashboard', function () {
-        return view('parent.dashboard');
-    })->name('parent.dashboard');
+// Routes pour les étudiants
+Route::middleware(['auth', 'isEtudiant'])->prefix('etudiant')->name('etudiant.')->group(function () {
+    Route::get('/dashboard', [EtudiantController::class, 'dashboard'])->name('dashboard');
+    Route::get('/emploi-du-temps', [EtudiantController::class, 'emploiDuTemps'])->name('emploi');
+    Route::get('/absences', [EtudiantController::class, 'listeAbsences'])->name('absences');
+    Route::get('/assiduite', [EtudiantController::class, 'noteAssiduite'])->name('assiduite');
 });
 
-
-
-// Route pour les coordinateurs
-Route::middleware(['auth', 'isCoordinateur'])->group(function () {
-    Route::get('/coordinateur/dashboard', function () {
-        return view('coordinateur.dashboardCoordinateur');
-    })->name('coordinateur.dashboard');
+// Routes pour les parents
+Route::middleware(['auth', 'isParent'])->prefix('parent')->name('parent.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('parent.dashboardParent');
+    })->name('dashboard');
 });
 
-
-// Route pour les enseignants
-Route::middleware(['auth', 'isEnseignant'])->group(function () {
-    Route::get('/enseignant/dashboard', function () {
+// Routes pour les enseignants
+Route::middleware(['auth', 'isEnseignant'])->prefix('enseignant')->name('enseignant.')->group(function () {
+    Route::get('/dashboard', function () {
         return view('enseignant.dashboardEnseignant');
-    })->name('enseignant.dashboard');
+    })->name('dashboard');
 });
 
-
-
+// Routes du profil
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

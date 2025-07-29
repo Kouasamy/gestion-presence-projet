@@ -1,89 +1,72 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Liste des Cours et Types de Cours</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .btn-icon {
-            background-color: #2f3357;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+@extends('layouts.admin')
 
-        .btn-icon:hover {
-            background-color: #1d203c;
-        }
-    </style>
-</head>
-<body class="p-4">
+@section('title', 'Liste des Cours')
 
-    <!-- Bouton de retour -->
-    <a href="{{ route('admin.cours.index') }}" class="btn-icon mb-4">
-        <i class="fas fa-arrow-left"></i>
-        Retour à l’ajout
-    </a>
+@section('content')
+<div class="py-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="p-6 bg-white border-b border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        📚 Liste des Cours
+                    </h2>
+                    <a href="{{ route('admin.cours.create') }}" class="custom-button">
+                        <i class="fas fa-plus mr-2"></i> Ajouter un cours
+                    </a>
+                </div>
 
-    <h2 class="mb-4">📚 Liste des cours</h2>
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nom du cours</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($matieres as $matiere)
-                <tr>
-                    <td>{{ $matiere->id }}</td>
-                    <td>{{ $matiere->nom_matiere }}</td>
-                    <td>
-                        <a href="{{ route('admin.cours.edit', $matiere->id) }}" class="btn btn-sm btn-warning">Modifier</a>
-                        <form action="{{ route('admin.cours.destroy', $matiere->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de ce cours ?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+                @if(session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-    <h2 class="mt-5 mb-4">🏷️ Liste des types de cours</h2>
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nom du type de cours</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($typesCours as $type)
-                <tr>
-                    <td>{{ $type->id }}</td>
-                    <td>{{ $type->nom_type_cours }}</td>
-                    <td>
-                        <a href="{{ route('admin.typecours.edit', $type->id) }}" class="btn btn-sm btn-warning">Modifier</a>
-                        <form action="{{ route('admin.typecours.destroy', $type->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de ce type de cours ?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+                <div class="overflow-x-auto">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
 
-</body>
-</html>
+                                <th>Nom du cours</th>
+                                <th>Type de cours</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($matieres as $matiere)
+                                <tr>
+
+                                    <td>{{ $matiere->nom_matiere }}</td>
+                                    <td>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ $matiere->type_cours->nom_type_cours ?? 'Non défini' }}
+                                        </span>
+                                    </td>
+                                    <td class="flex gap-2">
+                                        <a href="{{ route('admin.cours.edit', $matiere->id) }}"
+                                           class="custom-button bg-yellow-500 hover:bg-yellow-600">
+                                            <i class="fas fa-edit mr-2"></i>
+                                            Modifier
+                                        </a>
+                                        <form action="{{ route('admin.cours.destroy', $matiere->id) }}"
+                                              method="POST"
+                                              class="inline-block"
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="custom-button bg-red-500 hover:bg-red-600">
+                                                <i class="fas fa-trash-alt mr-2"></i>
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

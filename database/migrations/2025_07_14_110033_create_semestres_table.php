@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->date('date_debut_semestre');
             $table->date('date_fin_semestre');
-            $table->foreignId('annee_academique_id')->constrained('annees_academiques')->onDelete('cascade');
+            $table->foreignId('annees_academiques_id')->constrained('annees_academiques')->onDelete('cascade');
             $table->timestamps();
         });
     }
