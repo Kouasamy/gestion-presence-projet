@@ -192,7 +192,29 @@ class CoordinateurController extends Controller
         }, 'seances.matiere', 'seances.enseignant.user', 'seances.typeCours'])
             ->findOrFail($classeId);
 
-        return view('coordinateur.emploiDuTemps', compact('classe', 'dateDebut'));
+        $classes = Classe::all();
+
+        // Prepare $jours array
+        $jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+
+        // Prepare $emploiDuTemps array indexed by day and period
+        $emploiDuTemps = [];
+
+        foreach ($classe->seances as $seance) {
+            $jour = ucfirst(Carbon::parse($seance->date_seance)->locale('fr')->dayName);
+            $periode = Carbon::parse($seance->heure_debut)->hour < 12 ? 'matin' : 'soir';
+
+            $emploiDuTemps[$jour][$periode] = [
+                'cours' => $seance->matiere->nom_matiere,
+                'enseignant' => $seance->enseignant->user->nom,
+                'type' => $seance->typeCours->nom_type_cours,
+                'heure_debut' => $seance->heure_debut,
+                'heure_fin' => $seance->heure_fin,
+                'statut_id' => $seance->statut_seance_id,
+            ];
+        }
+
+        return view('coordinateur.emploiDuTemps', compact('classe', 'dateDebut', 'classes', 'jours', 'emploiDuTemps'));
     }
 
 
@@ -374,7 +396,7 @@ class CoordinateurController extends Controller
                 }
 
                 DB::commit();
-                return redirect()->route('coordinateur.emploiDuTemps.index')
+                return redirect()->route('coordinateur.emploiDuTemps.show', ['classe' => $classeId])
                     ->with('success', 'Emploi du temps créé avec succès');
             } catch (\Exception $e) {
                 DB::rollback();
@@ -552,24 +574,16 @@ class CoordinateurController extends Controller
     public function indexEmploiDuTemps(Request $request)
     {
         $query = Seance::where('coordinateur_id', Auth::user()->coordinateur->id)
-            ->select('date_seance', 'classe_id', 'coordinateur_id')
+            ->select('classe_id', 'coordinateur_id')
             ->with(['classe', 'coordinateur.user'])
-            ->groupBy('date_seance', 'classe_id', 'coordinateur_id');
+            ->groupBy('classe_id', 'coordinateur_id');
 
         // Filtre par classe
         if ($request->filled('classe')) {
             $query->where('classe_id', $request->classe);
         }
 
-        // Filtre par date
-        if ($request->filled('date_debut')) {
-            $query->whereDate('date_seance', '>=', $request->date_debut);
-        }
-        if ($request->filled('date_fin')) {
-            $query->whereDate('date_seance', '<=', $request->date_fin);
-        }
-
-        $emploisDuTemps = $query->orderBy('date_seance', 'desc')->paginate(10);
+        $emploisDuTemps = $query->orderBy('classe_id', 'asc')->paginate(10);
         $classes = Classe::all();
 
         return view('coordinateur.listeEmploiDuTemps', compact('emploisDuTemps', 'classes'));
@@ -894,6 +908,7 @@ class CoordinateurController extends Controller
             // Récupérer les IDs depuis la requête ou derniers par défaut
             $anneeId = $request->input('annee') ?? AnneeAcademique::latest()->first()->id;
             $semestreId = $request->input('semestre') ?? Semestre::latest()->first()->id;
+            $classeId = $request->input('classe'); // New class filter
 
             // Récupérer les objets complets pour accéder aux dates
             $anneeObj = AnneeAcademique::find($anneeId);
@@ -901,6 +916,7 @@ class CoordinateurController extends Controller
 
             $annees = AnneeAcademique::all();
             $semestres = Semestre::orderBy('date_debut_semestre', 'desc')->get();
+            $classes = Classe::all(); // Pass classes to view
 
             // Initialiser les variables
             $tauxPresenceEtudiants = [];
@@ -910,7 +926,7 @@ class CoordinateurController extends Controller
 
             // Calculer les données seulement si les filtres sont valides
             if ($anneeObj && $semestreObj) {
-                $tauxPresenceEtudiants = $this->getTauxPresenceEtudiants($anneeObj, $semestreObj);
+                $tauxPresenceEtudiants = $this->getTauxPresenceEtudiants($anneeObj, $semestreObj, $classeId);
                 $tauxPresenceClasses = $this->getTauxPresenceClasses($anneeObj, $semestreObj);
                 $volumeCoursParType = $this->getVolumeCoursParType($anneeObj, $semestreObj);
                 $volumeCumuleCours = $this->getVolumeCumuleCours($anneeObj, $semestreObj);
@@ -919,6 +935,7 @@ class CoordinateurController extends Controller
             return view('Coordinateur.statistiques', compact(
                 'annees',
                 'semestres',
+                'classes',
                 'tauxPresenceEtudiants',
                 'tauxPresenceClasses',
                 'volumeCoursParType',
@@ -934,7 +951,7 @@ class CoordinateurController extends Controller
     }
 
 
-    private function getTauxPresenceEtudiants($anneeObj = null, $semestreObj = null)
+    private function getTauxPresenceEtudiants($anneeObj = null, $semestreObj = null, $classeId = null)
     {
         $startDate = $semestreObj->date_debut_semestre ?? null;
         $endDate = $semestreObj->date_fin_semestre ?? null;
@@ -952,6 +969,12 @@ class CoordinateurController extends Controller
             $anneeId = $anneeObj->id;
             $query->whereHas('classes', function ($q) use ($anneeId) {
                 $q->where('etudiant_classe.annee_academique_id', $anneeId);
+            });
+        }
+
+        if ($classeId) {
+            $query->whereHas('classes', function ($q) use ($classeId) {
+                $q->where('classes.id', $classeId);
             });
         }
 

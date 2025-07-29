@@ -17,8 +17,6 @@
                     </a>
                 </div>
 
-
-
                 @if($emploisDuTemps->isEmpty())
                     <div class="text-center py-8">
                         <i class="fas fa-calendar-week text-gray-400 text-5xl mb-4"></i>
@@ -30,7 +28,6 @@
                             <thead>
                                 <tr class="bg-gray-50">
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre de séances</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créé par</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
@@ -40,9 +37,6 @@
                                     <tr>
                                         <td class="px-6 py-4">
                                             {{ $emploi->classe->nom_classe }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            {{ $emploi->seances_count }} séances
                                         </td>
                                         <td class="px-6 py-4">
                                             {{ $emploi->coordinateur->user->nom }}
@@ -71,28 +65,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const classeFilter = document.getElementById('classe_filter');
-    const dateDebut = document.getElementById('date_debut');
-    const dateFin = document.getElementById('date_fin');
-
-    function applyFilters() {
-        const params = new URLSearchParams();
-
-        if (classeFilter.value) params.set('classe', classeFilter.value);
-        if (dateDebut.value) params.set('date_debut', dateDebut.value);
-        if (dateFin.value) params.set('date_fin', dateFin.value);
-
-        window.location.href = `{{ route('coordinateur.emploiDuTemps.index') }}?${params.toString()}`;
-    }
-
-    classeFilter.addEventListener('change', applyFilters);
-    dateDebut.addEventListener('change', applyFilters);
-    dateFin.addEventListener('change', applyFilters);
-});
-</script>
-@endpush
 @endsection

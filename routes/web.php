@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\CoordinateurController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EnseignantController;
 use App\Http\Controllers\EtudiantController;
+use App\Http\Controllers\ParentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +29,10 @@ Route::get('/', function () {
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Assignation parent - étudiant
+    Route::get('/etudiants/{etudiant}/assigner-parent', [AdminController::class, 'formAssignerParent'])->name('etudiants.formAssignerParent');
+    Route::post('/etudiants/{etudiant}/assigner-parent', [AdminController::class, 'assignerParent'])->name('etudiants.assignerParent');
 
     // Gestion des utilisateurs
     Route::prefix('users')->name('user.')->group(function () {
@@ -130,8 +136,8 @@ Route::middleware(['auth', 'isCoordinateur'])->prefix('coordinateur')->name('coo
         Route::delete('/{seance}', [CoordinateurController::class, 'destroy'])->name('destroy');
 
         // Gestion des reports et annulations
-        Route::post('/coordinateur/seances/{seance}/reporter', [CoordinateurController::class, 'reporterSeance'])->name('coordinateur.seances.reporter');
-        Route::post('/coordinateur/seances/{seance}/annuler', [CoordinateurController::class, 'annulerSeance'])->name('coordinateur.seances.annuler');
+        Route::post('/{seance}/reporter', [CoordinateurController::class, 'reporterSeance'])->name('reporter');
+        Route::post('/{seance}/annuler', [CoordinateurController::class, 'annulerSeance'])->name('annuler');
     });
     // Statistiques
     Route::get('/statistiques', [CoordinateurController::class, 'statistiques'])->name('statistiques');
@@ -186,17 +192,26 @@ Route::middleware(['auth', 'isEtudiant'])->prefix('etudiant')->name('etudiant.')
 });
 
 // Routes pour les parents
+
+
 Route::middleware(['auth', 'isParent'])->prefix('parent')->name('parent.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('parent.dashboardParent');
-    })->name('dashboard');
+    Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
+    Route::get('/emploi-du-temps', [ParentController::class, 'emploiDuTemps'])->name('emploiDuTemps');
+    Route::get('/absences', [ParentController::class, 'absences'])->name('absences');
 });
+
+
 
 // Routes pour les enseignants
 Route::middleware(['auth', 'isEnseignant'])->prefix('enseignant')->name('enseignant.')->group(function () {
     Route::get('/dashboard', function () {
         return view('enseignant.dashboardEnseignant');
     })->name('dashboard');
+
+    Route::get('/seances', [EnseignantController::class, 'listeSeances'])->name('listeSeances');
+    Route::get('/seances/{seance}/presence', [EnseignantController::class, 'formulairePresence'])->name('formulairePresence');
+    Route::post('/seances/{seance}/presence', [EnseignantController::class, 'enregistrerPresence'])->name('enregistrerPresence');
+    Route::get('/emploi-du-temps', [EnseignantController::class, 'emploiDuTemps'])->name('emploiDuTemps');
 });
 
 // Routes du profil

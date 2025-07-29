@@ -49,7 +49,14 @@ class EtudiantController extends Controller
             'note' => round(($item['taux'] / 100) * 20, 1)
         ]);
 
-        return view('etudiant.dashboardEtudiant', compact('tauxGlobal','absencesNonJustifiees','presencesParMatiere','assiduite'));
+        // Calculate dropped subjects notifications
+        $droppedSubjects = $presencesParMatiere->filter(fn($item) => $item['taux'] < 30)->map(fn($item) => [
+            'matiere' => $item['matiere'],
+            'taux' => $item['taux'],
+            'message' => "Vous êtes droppé de la matière {$item['matiere']} avec un taux de présence de {$item['taux']}%"
+        ]);
+
+        return view('etudiant.dashboardEtudiant', compact('tauxGlobal','absencesNonJustifiees','presencesParMatiere','assiduite', 'droppedSubjects'));
     }
 
     public function emploiDuTemps()

@@ -326,12 +326,44 @@ class AdminController extends Controller
     }
 
 
-    public function destroyClasse($id)
-    {
-        $classe = Classe::findOrFail($id);
-        $classe->delete();
+public function destroyClasse($id)
+{
+    $classe = Classe::findOrFail($id);
+    $classe->delete();
 
-        return redirect()->route('classe.liste')->with('success', 'Classe supprimée.');
+    return redirect()->route('classe.liste')->with('success', 'Classe supprimée.');
+}
+
+    /**
+        * Affiche le formulaire pour assigner un parent à un étudiant.
+     */
+    public function formAssignerParent(Etudiant $etudiant)
+    {
+        $parents = User::whereHas('role', function ($query) {
+            $query->where('nom_role', 'parent');
+        })->get();
+
+        return view('admin.formAssignerParent', compact('etudiant', 'parents'));
+    }
+
+    /**
+     * Assigne un parent à un étudiant.
+     */
+    public function assignerParent(Request $request, Etudiant $etudiant)
+    {
+        $request->validate([
+            'parent_id' => 'required|exists:users,id',
+        ]);
+
+        $parentUser = User::find($request->parent_id);
+
+        if ($parentUser && $parentUser->parent) {
+            $etudiant->parents()->syncWithoutDetaching([$parentUser->parent->id]);
+        } else {
+            return redirect()->back()->with('error', 'Le parent sélectionné n\'est pas valide.');
+        }
+
+        return redirect()->route('admin.user.index')->with('success', 'Parent assigné avec succès.');
     }
 
     // CRUD pour les statuts de séance

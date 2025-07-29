@@ -39,61 +39,61 @@
                 <!-- Sélection de classe -->
                 <div class="mb-6">
                     <label for="classe_select" class="block text-gray-700 font-semibold mb-2">Sélectionner la classe</label>
-                    <select id="classe_select" class="w-full border-gray-300 rounded-md shadow-sm text-lg" required>
+                    <select id="classe_select" class="w-full border-gray-300 rounded-md shadow-sm text-lg" onchange="location = this.value;">
                         <option value="">Sélectionner une classe</option>
-                        @foreach($classes as $classe)
-                            <option value="{{ $classe->id }}">{{ $classe->nom_classe }}</option>
+                        @foreach($classes as $c)
+                            <option value="{{ route('coordinateur.emploiDuTemps.show', ['classe' => $c->id]) }}" @if(isset($classe) && $classe->id == $c->id) selected @endif>{{ $c->nom_classe }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <!-- Emploi du temps -->
-                <div id="timetable_container" class="hidden">
-                    <table class="w-full border-collapse bg-[#2f3357] text-white rounded-lg overflow-hidden mb-6 text-lg" style="min-width:1200px;">
-                        <thead>
-                            <tr>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Horaires</th>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Lundi</th>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Mardi</th>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Mercredi</th>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Jeudi</th>
-                                <th class="p-6 bg-[#262944] font-semibold text-xl">Vendredi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <table class="w-full border-collapse bg-[#2f3357] text-white rounded-lg overflow-hidden mb-6 text-lg" style="min-width:1200px;">
+                    <thead>
+                        <tr>
+                            <th class="p-6 bg-[#262944] font-semibold text-xl">Horaires</th>
+                            @foreach($jours as $jour)
+                                <th class="p-6 bg-[#262944] font-semibold text-xl">{{ $jour }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(['matin' => '09h-12h00', 'soir' => '13h30-16h30'] as $periode => $horaire)
                             <tr>
                                 <td class="p-6 bg-[#262944] text-lg h-20 align-middle">
-                                    <div class="font-semibold">Matin</div>
-                                    <div class="text-base opacity-80">09h-12h00</div>
+                                    <div class="font-semibold">{{ ucfirst($periode) }}</div>
+                                    <div class="text-base opacity-80">{{ $horaire }}</div>
                                 </td>
-                                @foreach(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] as $jour)
-                                <td class="p-6 border border-[#3d4270] text-lg h-20 align-middle" id="cell_{{ $jour }}_matin">
-                                    <div class="text-center text-gray-400">Aucune séance</div>
-                                </td>
+                                @foreach($jours as $jour)
+                                    <td class="p-6 border border-[#3d4270] text-lg h-20 align-middle">
+                                        @if(isset($emploiDuTemps[$jour][$periode]))
+                                            <div class="bg-[#3d4270] rounded-lg p-4">
+                                                <div class="font-semibold">{{ $emploiDuTemps[$jour][$periode]['cours'] }}</div>
+                                                <div class="text-sm opacity-80">{{ $emploiDuTemps[$jour][$periode]['enseignant'] }}</div>
+                                                <div class="text-sm">{{ $emploiDuTemps[$jour][$periode]['type'] }}</div>
+                                                <div class="text-sm mt-2">
+                                                    {{ \Carbon\Carbon::parse($emploiDuTemps[$jour][$periode]['heure_debut'])->format('H:i') }} -
+                                                    {{ \Carbon\Carbon::parse($emploiDuTemps[$jour][$periode]['heure_fin'])->format('H:i') }}
+                                                </div>
+                                                @if($emploiDuTemps[$jour][$periode]['statut_id'] == 3)
+                                                    <div class="mt-2 text-red-400 font-medium">
+                                                        Annulée
+                                                    </div>
+                                                @elseif($emploiDuTemps[$jour][$periode]['statut_id'] == 4)
+                                                    <div class="mt-2 text-yellow-400 font-medium">
+                                                        Reportée
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <div class="text-center text-gray-400">Aucune séance</div>
+                                        @endif
+                                    </td>
                                 @endforeach
                             </tr>
-                            <tr>
-                                <td class="p-6 bg-[#262944] text-lg h-20 align-middle">
-                                    <div class="font-semibold">Après-Midi</div>
-                                    <div class="text-base opacity-80">13h30-16h30</div>
-                                </td>
-                                @foreach(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] as $jour)
-                                <td class="p-6 border border-[#3d4270] text-lg h-20 align-middle" id="cell_{{ $jour }}_soir">
-                                    <div class="text-center text-gray-400">Aucune séance</div>
-                                </td>
-                                @endforeach
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Message quand aucune classe n'est sélectionnée -->
-                <div id="no_selection" class="text-center py-8">
-                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="text-gray-500">Veuillez sélectionner une classe pour afficher son emploi du temps</p>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -103,10 +103,10 @@
 <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Reporter la séance</h2>
-    <form id="reportForm" action="" method="POST" class="space-y-4">
-        @csrf
-        @method('POST')
-        <input type="hidden" name="seance_id" id="seance_id_report">
+        <form id="reportForm" action="" method="POST" class="space-y-4">
+            @csrf
+            @method('POST')
+            <input type="hidden" name="seance_id" id="seance_id_report">
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nouvelle date</label>
@@ -144,10 +144,10 @@
 <div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Annuler la séance</h2>
-    <form id="cancelForm" action="" method="POST" class="space-y-4">
-        @csrf
-        @method('POST')
-        <input type="hidden" name="seance_id" id="seance_id_cancel">
+        <form id="cancelForm" action="" method="POST" class="space-y-4">
+            @csrf
+            @method('POST')
+            <input type="hidden" name="seance_id" id="seance_id_cancel">
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Motif de l'annulation</label>
@@ -168,85 +168,10 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const classeSelect = document.getElementById('classe_select');
-    const timetableContainer = document.getElementById('timetable_container');
-    const noSelection = document.getElementById('no_selection');
+    // Gestion du modal de report
     const reportModal = document.getElementById('reportModal');
     const cancelModal = document.getElementById('cancelModal');
 
-    // Set initial classe value if provided in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialClasseId = '{{ request()->route("classe") }}';
-    const dateDebut = urlParams.get('date_debut');
-
-    if (initialClasseId) {
-        classeSelect.value = initialClasseId;
-        loadTimetable(initialClasseId, dateDebut);
-    }
-
-    classeSelect.addEventListener('change', function() {
-        const classeId = this.value;
-        if (classeId) {
-            loadTimetable(classeId, null);
-        } else {
-            timetableContainer.classList.add('hidden');
-            noSelection.classList.remove('hidden');
-        }
-    });
-
-    function loadTimetable(classeId, dateDebut) {
-        let url = `{{ route('coordinateur.emploiDuTemps.show', '') }}/${classeId}`;
-        if (dateDebut) {
-            url += `?date_debut=${dateDebut}`;
-        }
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                timetableContainer.classList.remove('hidden');
-                noSelection.classList.add('hidden');
-                displaySeances(data.seances);
-            })
-            .catch(error => {
-                window.location.reload();
-            });
-    }
-
-    function displaySeances(seances) {
-        // Réinitialiser toutes les cellules
-        document.querySelectorAll('[id^="cell_"]').forEach(cell => {
-            cell.innerHTML = '<div class="text-center text-gray-400">Aucune séance</div>';
-        });
-
-        // Afficher les séances
-        seances.forEach(seance => {
-            const periode = seance.heure_debut.startsWith('09') ? 'matin' : 'soir';
-            const jour = new Date(seance.date_seance).toLocaleString('fr-FR', {weekday: 'long'});
-            const cell = document.getElementById(`cell_${jour}_${periode}`);
-
-            if (cell) {
-                cell.innerHTML = `
-                    <div class="bg-[#3d4270] rounded-lg p-4">
-                        <div class="font-semibold">${seance.matiere.nom_matiere}</div>
-                        <div class="text-sm opacity-80">${seance.enseignant.user.nom}</div>
-                        <div class="text-sm">${seance.type_cours.nom_type_cours}</div>
-                        <div class="mt-2 flex justify-end gap-2">
-                            <button onclick="openReportModal(${seance.id})"
-                                    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                                Reporter
-                            </button>
-                            <button onclick="openCancelModal(${seance.id})"
-                                    class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                                Annuler
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-    }
-
-    // Gestion du modal de report
     window.openReportModal = function(seanceId) {
         document.getElementById('seance_id_report').value = seanceId;
         reportModal.classList.remove('hidden');
@@ -276,10 +201,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('reportForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const seanceId = document.getElementById('seance_id_report').value;
-        const formData = new FormData(this);
 
         const form = document.getElementById('reportForm');
-        form.action = `{{ route('coordinateur.seances.reporter', '') }}/${seanceId}`;
+        form.action = `/coordinateur/seances/${seanceId}/reporter`;
         form.submit();
     });
 
@@ -287,10 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cancelForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const seanceId = document.getElementById('seance_id_cancel').value;
-        const formData = new FormData(this);
 
         const form = document.getElementById('cancelForm');
-        form.action = `{{ route('coordinateur.seances.annuler', '') }}/${seanceId}`;
+        form.action = `/coordinateur/seances/${seanceId}/annuler`;
         form.submit();
     });
 
@@ -303,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             closeCancelModal();
         }
     }
-});
 </script>
 @endpush
 
@@ -343,6 +265,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     .text-white {
         color: black !important;
+    }
+
+    .bg-[#3d4270] {
+        background-color: #f3f4f6 !important;
+        color: black !important;
+    }
+
+    .text-red-400 {
+        color: #dc2626 !important;
+    }
+
+    .text-yellow-400 {
+        color: #d97706 !important;
     }
 }
 </style>

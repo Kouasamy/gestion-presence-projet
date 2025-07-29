@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <title>{{ config('app.name', 'Laravel') }} - @yield('title', 'Coordinateur')</title>
+    <title>{{ config('app.name', 'Laravel') }} - @yield('title', 'Enseignant')</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link rel="preconnect" href="https://fonts.bunny.net" />
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
@@ -31,48 +31,32 @@
             <nav class="nav-menu">
                 <div class="nav-menu-container">
                     <ul>
-                        <!-- Dashboard -->
-                        <li class="{{ request()->routeIs('coordinateur.dashboard') ? 'active' : '' }}">
-                            <a href="{{ route('coordinateur.dashboard') }}" title="Tableau de bord">
+                        <!-- Tableau de bord -->
+                        <li class="{{ request()->routeIs('enseignant.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('enseignant.dashboard') }}" title="Tableau de bord">
                                 <i class="fa-solid fa-house" style="font-size: 20px;"></i>
                             </a>
                         </li>
 
                         <!-- Séances -->
-                        <li class="{{ request()->routeIs('coordinateur.seances.*') ? 'active' : '' }}">
-                            <a href="{{ route('coordinateur.seances.index') }}" title="Gestion des séances">
+                        <li class="{{ request()->routeIs('enseignant.listeSeances') ? 'active' : '' }}">
+                            <a href="{{ route('enseignant.listeSeances') }}" title="Mes séances">
                                 <i class="fa-solid fa-calendar-days" style="font-size: 20px;"></i>
                             </a>
                         </li>
 
-
-                        <!-- Absences -->
-                        <li class="{{ request()->routeIs('coordinateur.absences.*') ? 'active' : '' }}">
-                            <a href="{{ route('coordinateur.absences.index') }}" title="Gestion des absences">
-                                <i class="fa-solid fa-user-xmark" style="font-size: 20px;"></i>
-                            </a>
-                        </li>
-
                         <!-- Emploi du temps -->
-                        <li class="{{ request()->routeIs('coordinateur.emploiDuTemps.*') ? 'active' : '' }}">
-                            <a href="{{ route('coordinateur.emploiDuTemps.index') }}" title="Emploi du temps">
+                        <li class="{{ request()->routeIs('enseignant.emploiDuTemps') ? 'active' : '' }}">
+                            <a href="{{ route('enseignant.emploiDuTemps') }}" title="Mon emploi du temps">
                                 <i class="fa-solid fa-clock" style="font-size: 20px;"></i>
                             </a>
                         </li>
-
-                        <!-- Statistiques -->
-                        <li class="{{ request()->routeIs('coordinateur.statistiques') ? 'active' : '' }}">
-                            <a href="{{ route('coordinateur.statistiques') }}" title="Statistiques">
-                                <i class="fa-solid fa-chart-line" style="font-size: 20px;"></i>
-                            </a>
-                        </li>
-
                     </ul>
                 </div>
             </nav>
 
             <div class="header-icons">
-                <x-notification-dropdown :notifications="$stats['etudiantsDroppes'] ?? collect([])" />
+                <x-notification-dropdown :notifications="collect()" />
 
                 <!-- Profil et Déconnexion -->
                 <div class="flex items-center space-x-4">

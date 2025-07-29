@@ -15,8 +15,6 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Scripts and Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/style.css'])
@@ -64,6 +62,8 @@
 </nav>
 
             <div class="header-icons">
+                <x-notification-dropdown :notifications="$droppedSubjects ?? collect([])" />
+
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('profile.edit') }}" class="icon-btn" title="Mon profil">
                         <i class="fa-solid fa-user" style="font-size: 20px; color: white;"></i>

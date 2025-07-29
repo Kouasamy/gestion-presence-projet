@@ -21,32 +21,45 @@
                     <!-- Filtres -->
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <form method="GET" action="{{ route('coordinateur.statistiques') }}" id="filterForm">
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Année académique</label>
-                                <select name="annee" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-800">
-                                    <option value="">Toutes les années</option>
-                                    @foreach($annees as $annee)
-                                        <option value="{{ $annee->id }}" {{ request('annee') == $annee->id ? 'selected' : '' }}>
-                                            {{ $annee->nom_annee }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
-                               <select name="semestre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-800">
-                                    <option value="">Tous les semestres</option>
-                                    @foreach($semestres as $semestre)
-                                        <option value="{{ $semestre->id }}" {{ request('semestre') == $semestre->id ? 'selected' : '' }}>
-                                            {{ $semestre->nom_semestre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <button type="submit" class="px-4 py-2 bg-[#e11d48] text-white rounded-lg hover:bg-[#be123c] transition-colors">
-                                    <i class="fas fa-filter mr-2"></i>Filtrer
-                                </button>
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Année académique</label>
+                                    <select name="annee" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
+                                        <option value="">Toutes les années</option>
+                                        @foreach($annees as $annee)
+                                            <option value="{{ $annee->id }}" {{ request('annee') == $annee->id ? 'selected' : '' }}>
+                                                {{ $annee->annee }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
+                                    <select name="semestre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
+                                        <option value="">Tous les semestres</option>
+                                        @foreach($semestres as $semestre)
+                                            <option value="{{ $semestre->id }}" {{ request('semestre') == $semestre->id ? 'selected' : '' }}>
+                                                {{ $semestre->nom}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
+                                    <select name="classe" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-800">
+                                        <option value="">Toutes les classes</option>
+                                        @foreach($classes as $classe)
+                                            <option value="{{ $classe->id }}" {{ request('classe') == $classe->id ? 'selected' : '' }}>
+                                                {{ $classe->nom_classe }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex items-end">
+                                    <button type="submit" class="px-4 py-2 bg-[#e11d48] text-white rounded-lg hover:bg-[#be123c] transition-colors">
+                                        <i class="fas fa-filter mr-2"></i>Filtrer
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
