@@ -841,6 +841,21 @@ class CoordinateurController extends Controller
         return view('coordinateur.editEmploiDuTemps', compact('classe', 'seances', 'matieres', 'enseignants', 'typesCours'));
     }
 
+    /**
+     * Supprime un emploi du temps et toutes les séances associées.
+     */
+    public function destroyEmploiDuTemps($classeId)
+    {
+        $seances = Seance::where('classe_id', $classeId)->get();
+
+        foreach ($seances as $seance) {
+            $seance->delete();
+        }
+
+        return redirect()->route('coordinateur.emploiDuTemps.index')
+            ->with('success', 'Emploi du temps et ses séances supprimés avec succès.');
+    }
+
     private function getStatistiques()
     {
         // Nombre de séances prévues aujourd'hui

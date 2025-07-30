@@ -50,6 +50,13 @@
                                                class="text-yellow-600 hover:text-yellow-900">
                                                 <i class="fas fa-edit"></i> Modifier
                                             </a>
+                                        <form action="{{ route('coordinateur.emploiDuTemps.destroy', $emploi->classe_id) }}" method="POST" class="inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emploi du temps ?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach

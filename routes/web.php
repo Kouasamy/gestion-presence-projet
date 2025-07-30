@@ -172,6 +172,7 @@ Route::middleware(['auth', 'isCoordinateur'])->prefix('coordinateur')->name('coo
         Route::get('/{emploi}/edit', [CoordinateurController::class, 'editEmploiDuTemps'])->name('edit');
         Route::put('/{emploi}', [CoordinateurController::class, 'updateEmploiDuTemps'])->name('update');
         Route::get('/{classe}', [CoordinateurController::class, 'emploiDuTempsParClasse'])->name('show');
+        Route::delete('/{classe}', [CoordinateurController::class, 'destroyEmploiDuTemps'])->name('destroy');
     });
 
     // Liste des étudiants
