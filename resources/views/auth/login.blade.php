@@ -37,7 +37,9 @@
 
       <div class="footer">© Copyright 2024 | Tous droits réservés | IFRAN</div>
     </div>
-    <div class="right-side"></div>
+    <div class="right-side" style="background-image: url('https://ifran.ci/wp-content/uploads/2024/03/slide2023-scaled.jpg'); background-size: cover; position: relative;">
+      <div style="background-color: rgba(32, 33, 73, 0.7); position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+    </div>
   </div>
   @endsection
 
