@@ -189,7 +189,7 @@ class AdminController extends Controller
 
         return view('admin.listeCours', compact('matieres', 'typesCours'));
     }
-
+    // Affiche le formulaire pour ajouter un cours ou un type de cours
     public function indexCours()
     {
         return view('admin.formCours');

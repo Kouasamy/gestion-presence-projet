@@ -24,7 +24,7 @@
             </div>
             <div>
                 <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <input type="date" name="date" id="date" value="{{ request('date') }}" 
+                <input type="date" name="date" id="date" value="{{ request('date') }}"
                     class="form-input w-full rounded-md border-gray-300">
             </div>
             <div class="flex items-end">
@@ -72,7 +72,7 @@
                             </span>
                         </div>
                         <div>
-                            <a href="{{ route('coordinateur.presences.form', $seance->id) }}" 
+                            <a href="{{ route('coordinateur.presences.form', $seance->id) }}"
                                class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-clipboard-list mr-1"></i>
                                 {{ $presencesSaisies == 0 ? 'Saisir' : 'Modifier' }}
@@ -88,9 +88,9 @@
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-4">
-        {{ $seances->links() }}
-    </div>
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $seances->links() }}
+        </div>
 </div>
 @endsection

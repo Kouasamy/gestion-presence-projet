@@ -42,8 +42,6 @@ class CoordinateurController extends Controller
         return view('coordinateur.dashboardCoordinateur', compact('stats'));
     }
 
-
-
     public function indexUsersByRole($roleName)
     {
         $users = User::whereHas('role', function ($query) use ($roleName) {
@@ -53,16 +51,7 @@ class CoordinateurController extends Controller
         return view("admin.gestion{$roleName}", compact('users'));
     }
 
-    public function createSeance()
-    {
-        $classes = Classe::all();
-        $matieres = Matiere::all();
-        $enseignants = Enseignant::with('user')->get();
-        $typesCours = TypeCours::all();
-        $statutsSeance = StatutSeance::all();
 
-        return view('coordinateur.createSeance', compact('classes', 'matieres', 'enseignants', 'typesCours', 'statutsSeance'));
-    }
 
     public function storeSeance(Request $request)
     {
@@ -92,6 +81,7 @@ class CoordinateurController extends Controller
         return redirect()->route('coordinateur.seances.index')->with('success', 'Séance créée avec succès.');
     }
 
+    // Affiche la liste des séances
     public function indexSeances(Request $request)
     {
         $query = Seance::where('coordinateur_id', Auth::user()->coordinateur->id)
@@ -139,6 +129,7 @@ class CoordinateurController extends Controller
         return view('coordinateur.listeSeances', compact('seances', 'classes', 'typesCours'));
     }
 
+    // Affiche le formulaire d'édition d'une séance
     public function editSeance($id)
     {
         $seance = Seance::findOrFail($id);
@@ -151,6 +142,7 @@ class CoordinateurController extends Controller
         return view('coordinateur.editSeance', compact('seance', 'classes', 'matieres', 'enseignants', 'typesCours', 'statutsSeance'));
     }
 
+    // Met à jour une séance
     public function updateSeance(Request $request, $id)
     {
         $request->validate([
@@ -170,6 +162,7 @@ class CoordinateurController extends Controller
         return redirect()->route('coordinateur.seances.index')->with('success', 'Séance modifiée avec succès.');
     }
 
+    // Supprime une séance
     public function destroySeance($id)
     {
         $seance = Seance::findOrFail($id);
@@ -178,6 +171,7 @@ class CoordinateurController extends Controller
         return redirect()->route('coordinateur.seances.index')->with('success', 'Séance supprimée avec succès.');
     }
 
+    // Affiche l'emploi du temps d'une classe
     public function emploiDuTempsParClasse($classeId)
     {
         $dateDebut = request('date_debut');
@@ -591,9 +585,9 @@ class CoordinateurController extends Controller
 
 
 
-    /**
-     * Affiche la liste des étudiants avec photo et informations, filtrable par classe.
-     */
+
+    // Affiche la liste des étudiants avec photo et informations, filtrable par classe.
+
     public function listeEtudiants(Request $request)
     {
         $classes = Classe::all();
@@ -619,9 +613,9 @@ class CoordinateurController extends Controller
         return view('Coordinateur.listeEtudiants', compact('etudiants', 'classes', 'annees'));
     }
 
-    /**
-     * Assigne un étudiant à une classe (avec année académique et date de début)
-     */
+
+     // Assigne un étudiant à une classe (avec année académique et date de début)
+
     public function assignerClasse(Request $request, $etudiantId)
     {
         $request->validate([
@@ -652,9 +646,9 @@ class CoordinateurController extends Controller
         return back()->with('success', 'Étudiant assigné à la classe avec succès.');
     }
 
-    /**
-     * Désinscrire un étudiant d'une classe (supprime la ligne de la table de pivot)
-     */
+
+     // Désinscrire un étudiant d'une classe (supprime la ligne de la table de pivot)
+
     public function desinscrireClasse(Request $request, $etudiantId, $classeId)
     {
         $etudiant = Etudiant::findOrFail($etudiantId);
@@ -662,9 +656,9 @@ class CoordinateurController extends Controller
         return back()->with('success', 'Étudiant désinscrit de la classe avec succès.');
     }
 
-    /**
-     * Affiche le formulaire d'assignation d'un étudiant à une classe
-     */
+
+     // Affiche le formulaire d'assignation d'un étudiant à une classe
+
     public function formAssignerClasse($etudiantId)
     {
         $etudiant = Etudiant::with('user', 'classes')->findOrFail($etudiantId);
@@ -683,6 +677,7 @@ class CoordinateurController extends Controller
         return view('coordinateur.seances.index', compact('seances'));
     }
 
+    // Affiche le formulaire de création d'une séance
     public function create()
     {
         $classes = Classe::all();
@@ -700,6 +695,7 @@ class CoordinateurController extends Controller
         ));
     }
 
+    // Enregistre une nouvelle séance
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -730,7 +726,7 @@ class CoordinateurController extends Controller
         return redirect()->route('coordinateur.seances.index')
             ->with('success', 'Séance créée avec succès.');
     }
-
+    // L'édition d'une séance
     public function edit(Seance $seance)
     {
         $classes = Classe::all();
@@ -749,6 +745,7 @@ class CoordinateurController extends Controller
         ))->with('types', $typesCours);
     }
 
+    // Met à jour une séance
     public function update(Request $request, Seance $seance)
     {
         $validated = $request->validate([
@@ -768,6 +765,7 @@ class CoordinateurController extends Controller
             ->with('success', 'Séance mise à jour avec succès.');
     }
 
+    // Supprime une séance
     public function destroy(Seance $seance)
     {
         $seance->delete();
@@ -775,7 +773,7 @@ class CoordinateurController extends Controller
         return redirect()->route('coordinateur.seances.index')
             ->with('success', 'Séance supprimée avec succès.');
     }
-
+    // Reporte une séance
     public function reporterSeance(Request $request, $seanceId)
     {
         $request->validate([
@@ -810,6 +808,7 @@ class CoordinateurController extends Controller
             ->with('success', 'La séance a été reportée avec succès.');
     }
 
+    // Annule une séance
 
     public function annulerSeance(Request $request, $seanceId)
     {
@@ -830,9 +829,11 @@ class CoordinateurController extends Controller
             ->with('success', 'La séance a été annulée avec succès.');
     }
 
+
+    // Affiche le formulaire d'édition d'un emploi du temps pour une classe
     public function editEmploiDuTemps($emploiId)
     {
-        // À adapter selon ta structure :
+
         $seances = Seance::where('classe_id', $emploiId)->get();
         $classe = Classe::findOrFail($emploiId);
         $matieres = Matiere::all();
@@ -841,9 +842,9 @@ class CoordinateurController extends Controller
         return view('coordinateur.editEmploiDuTemps', compact('classe', 'seances', 'matieres', 'enseignants', 'typesCours'));
     }
 
-    /**
-     * Supprime un emploi du temps et toutes les séances associées.
-     */
+
+    // Supprime un emploi du temps et toutes les séances associées.
+
     public function destroyEmploiDuTemps($classeId)
     {
         $seances = Seance::where('classe_id', $classeId)->get();
@@ -856,6 +857,7 @@ class CoordinateurController extends Controller
             ->with('success', 'Emploi du temps et ses séances supprimés avec succès.');
     }
 
+    // Récupère les statistiques pour le tableau de bord du coordinateur
     private function getStatistiques()
     {
         // Nombre de séances prévues aujourd'hui
@@ -910,7 +912,6 @@ class CoordinateurController extends Controller
             'absencesNonJustifiees' => $absencesNonJustifiees
         ];
     }
-
     public function statistiques(Request $request)
     {
         try {
@@ -966,6 +967,7 @@ class CoordinateurController extends Controller
     }
 
 
+    // Récupère la couleur associée au taux de présence
     private function getTauxPresenceEtudiants($anneeObj = null, $semestreObj = null, $classeId = null)
     {
         $startDate = $semestreObj->date_debut_semestre ?? null;
@@ -1020,7 +1022,7 @@ class CoordinateurController extends Controller
             ->values();
     }
 
-
+    // Récupère le taux de présence par classe
     private function getTauxPresenceClasses($anneeObj = null, $semestreObj = null)
     {
         $startDate = $semestreObj->date_debut_semestre ?? null;
@@ -1058,7 +1060,7 @@ class CoordinateurController extends Controller
     }
 
 
-
+    // Récupère le volume de cours par type sur les 6 derniers mois
     private function getVolumeCoursParType($anneeObj = null, $semestreObj = null)
     {
         $typesCours = TypeCours::all();
@@ -1110,6 +1112,7 @@ class CoordinateurController extends Controller
     }
 
 
+    // Récupère le volume cumulé de cours par type sur les 4 derniers trimestres
     private function getVolumeCumuleCours($anneeObj = null, $semestreObj = null)
     {
         $now = now();
@@ -1170,6 +1173,7 @@ class CoordinateurController extends Controller
     }
 
 
+    // Récupère la couleur associée au type de cours
     private function getColorForTypeCours($nomType)
     {
         $colors = [
@@ -1183,6 +1187,7 @@ class CoordinateurController extends Controller
         return $colors[strtolower($nomType)] ?? '#6b7280'; // Gris par défaut
     }
 
+    // Récupère la couleur associée au taux de présence
     private function getCouleurTaux($taux)
     {
         if ($taux >= 70) {

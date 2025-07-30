@@ -59,6 +59,8 @@ class EtudiantController extends Controller
         return view('etudiant.dashboardEtudiant', compact('tauxGlobal','absencesNonJustifiees','presencesParMatiere','assiduite', 'droppedSubjects'));
     }
 
+
+    // Affiche l'emploi du temps de l'étudiant connecté
     public function emploiDuTemps()
     {
         $etudiant = Auth::user()->etudiant;
@@ -105,7 +107,7 @@ class EtudiantController extends Controller
         ]);
     }
 
-
+    // Affiche les absences de l'étudiant connecté
     public function listeAbsences()
     {
         $etudiant = Auth::user()->etudiant;
@@ -117,6 +119,8 @@ class EtudiantController extends Controller
         return view('etudiant.absences', compact('absences'));
     }
 
+    // Affiche la note d'assiduité de l'étudiant
+    // La note est calculée sur 20, basée sur le taux de présence
     public function noteAssiduite()
     {
         $etudiant = Auth::user()->etudiant;
@@ -131,7 +135,7 @@ class EtudiantController extends Controller
 
         return view('etudiant.noteAssiduite', compact('assiduite'));
     }
-
+    // Pour déterminer la couleur du taux de présence
     private function getCouleurTaux($taux)
     {
         return $taux >= 70 ? '#1a5d1a'

@@ -30,11 +30,15 @@
                     <div class="px-4 py-3 hover:bg-gray-50 border-b last:border-b-0">
                         <div class="flex items-start space-x-3">
                             <div class="flex-shrink-0">
-                                <img src="{{ $notification['photo'] }}" alt="" class="h-10 w-10 rounded-full">
+                                @if(isset($notification['photo']))
+    <img src="{{ $notification['photo'] }}" alt="" class="h-10 w-10 rounded-full">
+@else
+    <img src="default-photo-url.jpg" alt="" class="h-10 w-10 rounded-full">
+@endif
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm font-medium text-gray-900">
-                                    {{ $notification['nom'] }}
+                                {{ $notification['nom'] ?? 'Nom non disponible' }}
                                 </p>
                                 <p class="text-sm text-red-600">
                                     Taux de présence critique : {{ $notification['taux'] }}%

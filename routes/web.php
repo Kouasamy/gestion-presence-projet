@@ -193,8 +193,6 @@ Route::middleware(['auth', 'isEtudiant'])->prefix('etudiant')->name('etudiant.')
 });
 
 // Routes pour les parents
-
-
 Route::middleware(['auth', 'isParent'])->prefix('parent')->name('parent.')->group(function () {
     Route::get('/dashboard', [ParentController::class, 'dashboard'])->name('dashboard');
     Route::get('/emploi-du-temps', [ParentController::class, 'emploiDuTemps'])->name('emploiDuTemps');
