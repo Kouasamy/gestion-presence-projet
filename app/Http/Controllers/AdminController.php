@@ -2,592 +2,675 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnneeAcademique\StoreAnneeAcademiqueRequest;
+use App\Http\Requests\AnneeAcademique\UpdateAnneeAcademiqueRequest;
+use App\Http\Requests\Classe\StoreClasseRequest;
+use App\Http\Requests\Classe\UpdateClasseRequest;
+use App\Http\Requests\Etudiant\AssignerParentRequest;
+use App\Http\Requests\Role\StoreRoleRequest;
+use App\Http\Requests\Role\UpdateRoleRequest;
+use App\Http\Requests\Semestre\StoreSemestreRequest;
+use App\Http\Requests\Semestre\UpdateSemestreRequest;
+use App\Http\Requests\Matiere\StoreMatiereRequest;
+use App\Http\Requests\Matiere\UpdateMatiereRequest;
+use App\Http\Requests\TypeCours\StoreTypeCoursRequest;
+use App\Http\Requests\TypeCours\UpdateTypeCoursRequest;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\AnneeAcademique;
 use App\Models\Classe;
-use App\Models\Coordinateur;
-use App\Models\Enseignant;
 use App\Models\Etudiant;
 use App\Models\Matiere;
-use App\Models\Parents;
 use App\Models\Role;
 use App\Models\Semestre;
 use App\Models\StatutPresence;
 use App\Models\StatutSeance;
 use App\Models\TypeCours;
 use App\Models\User;
+use App\Services\AnneeAcademiqueService;
+use App\Services\ClasseService;
+use App\Services\MatiereService;
+use App\Services\TypeCoursService;
+use App\Services\EtudiantService;
+use App\Services\RoleService;
+use App\Services\SemestreService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-
 
 class AdminController extends Controller
 {
+    protected $userService;
+
+    protected $roleService;
+
+    protected $anneeAcademiqueService;
+
+    protected $semestreService;
+
+    protected $etudiantService;
+
+    protected $matiereService;
+
+    protected $typeCoursService;
+
+    protected $classeService;
+
+    /**
+     * Constructeur avec injection des dépendances
+     */
+    public function __construct(
+        UserService $userService,
+        RoleService $roleService,
+        AnneeAcademiqueService $anneeAcademiqueService,
+        SemestreService $semestreService,
+        EtudiantService $etudiantService,
+        MatiereService $matiereService,
+        TypeCoursService $typeCoursService,
+        ClasseService $classeService
+    ) {
+        $this->middleware('auth');
+        $this->middleware('isAdmin');
+
+        $this->userService = $userService;
+        $this->roleService = $roleService;
+        $this->anneeAcademiqueService = $anneeAcademiqueService;
+        $this->semestreService = $semestreService;
+        $this->etudiantService = $etudiantService;
+        $this->matiereService = $matiereService;
+        $this->typeCoursService = $typeCoursService;
+        $this->classeService = $classeService;
+    }
+
+    /**
+     * Affiche le tableau de bord de l'administrateur
+     */
     public function dashboard()
     {
-        return view('admin.dashboard');
+        return view('Admin.dashboard');
     }
 
-   public function indexUsersByRole($roleName = null)
-{
-    if ($roleName) {
-        $users = User::whereHas('role', function ($query) use ($roleName) {
-            $query->where('nom_role', $roleName);
-        })->get();
-    } else {
-        $users = User::all();
+    /**
+     * Liste les utilisateurs par rôle
+     */
+    public function indexUsersByRole($roleName = null)
+    {
+        $users = $this->userService->getUsersByRole($roleName);
+
+        return view('admin.listeUsers', compact('users'));
     }
 
-    return view("admin.listeUsers", compact('users'));
-}
-
-
+    /**
+     * Affiche le formulaire de création d'un utilisateur
+     */
     public function createUserForm()
     {
         $roles = Role::all();
-        return view('admin.formUser', compact('roles'));
+
+        return view('Admin.formUser', compact('roles'));
     }
 
-    public function storeUser(Request $request)
+    /**
+     * Crée un nouvel utilisateur
+     */
+    public function storeUser(StoreUserRequest $request)
     {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'photo_path' => 'nullable|image|max:2048',
-            'role_id' => 'required|exists:roles,id',
-        ]);
-        // Récupération du rôle
-        $role = Role::find($request->input('role_id'));
+        $user = $this->userService->createUser($request->validated());
 
-        if (!$role) {
-            return redirect()->back()->withErrors(['role_id' => 'Rôle invalide.']);
-        }
-        // Gestion de la photo
-        $photoPath = null;
-        if ($request->hasFile('photo_path')) {
-            $photoPath = $request->file('photo_path')->store('photos', 'public');
-        }
-
-        // Création de l'utilisateur
-        $user = User::create([
-            'nom' => $request->input('nom'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
-            'photo_path' => $photoPath,
-            'role_id' => $request->input('role_id'),
-        ]);
-
-        // Association du rôle à l'utilisateur
-        $roleName = trim(strtolower($role->nom_role));
-
-        switch ($roleName) {
-            case 'parent':
-                Parents::create(['user_id' => $user->id]);
-                break;
-
-            case 'enseignant':
-                Enseignant::create(['user_id' => $user->id]);
-                break;
-
-            case 'coordinateur':
-                Coordinateur::create(['user_id' => $user->id]);
-                break;
-
-            case 'etudiant':
-                Etudiant::create(['user_id' => $user->id, 'photo_path' => $photoPath]);
-                break;
-        }
-
-
-
-
-
-
-
-
-        // Message par défaut
-        $message = "Utilisateur créé avec succès.";
-
-
-        return redirect()->back()->with('success', $message);
+        return redirect()->route('admin.user.index')->with('success', 'Utilisateur créé avec succès.');
     }
-     public function destroyUser($id)
+
+    /**
+     * Affiche le formulaire d'édition d'un utilisateur
+     */
+    public function editUserForm(User $user)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $roles = Role::all();
+
+        return view('Admin.editUser', compact('user', 'roles'));
+    }
+
+    /**
+     * Met à jour un utilisateur existant
+     */
+    public function updateUser(UpdateUserRequest $request, User $user)
+    {
+        $this->userService->updateUser($user, $request->validated());
+
+        return redirect()->route('admin.user.index')->with('success', 'Utilisateur mis à jour avec succès.');
+    }
+
+    /**
+     * Supprime un utilisateur
+     */
+    public function destroyUser(User $user)
+    {
+        $this->userService->deleteUser($user);
 
         return redirect()->route('admin.user.index')->with('success', 'Utilisateur supprimé avec succès.');
     }
 
-    public function editUserForm(User $user)
-    {
-        $roles = Role::all();
-        return view('admin.editUser', compact('user', 'roles'));
-    }
-
+    /**
+     * Liste les rôles
+     */
     public function indexRoles()
     {
-        $roles = Role::all();
-        return view('admin.listeRole', compact('roles'));
+        $roles = $this->roleService->getAllRoles();
+
+        return view('Admin.listeRole', compact('roles'));
     }
 
-    // Formulaire de création de rôle
+    /**
+     * Affiche le formulaire de création d'un rôle
+     */
     public function createRole()
     {
-        return view('admin.formRole');
+        return view('Admin.formRole');
     }
 
-    // Enregistre un nouveau rôle
-    public function storeRole(Request $request)
+    /**
+     * Crée un nouveau rôle
+     */
+    public function storeRole(StoreRoleRequest $request)
     {
-        $request->validate([
-            'nom_role' => 'required|string|unique:roles,nom_role',
-        ]);
+        $this->roleService->createRole($request->validated());
 
-        Role::create([
-            'nom_role' => $request->nom_role,
-        ]);
-
-        return redirect()->route('admin.roles.index')
-            ->with('success', 'Rôle créé avec succès.');
+        return redirect()->route('admin.role.index')->with('success', 'Rôle créé avec succès.');
     }
 
-    // Formulaire de modification d’un rôle
-    public function editRole($id)
+    /**
+     * Affiche le formulaire d'édition d'un rôle
+     */
+    public function editRole(Role $role)
     {
-        $role = Role::findOrFail($id);
-        return view('admin.formRole', compact('role'));
+        return view('Admin.editRole', compact('role'));
     }
 
-    // Met à jour un rôle
-    public function updateRole(Request $request, $id)
+    /**
+     * Met à jour un rôle existant
+     */
+    public function updateRole(UpdateRoleRequest $request, Role $role)
     {
-        $request->validate([
-            'nom_role' => 'required|string|unique:roles,nom_role,' . $id,
-        ]);
+        $this->roleService->updateRole($role, $request->validated());
 
-        $role = Role::findOrFail($id);
-        $role->update([
-            'nom_role' => $request->nom_role,
-        ]);
-
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle modifié avec succès.');
+        return redirect()->route('admin.role.index')->with('success', 'Rôle mis à jour avec succès.');
     }
 
-    // Supprime un rôle
-    public function destroyRole($id)
+    /**
+     * Supprime un rôle
+     */
+    public function destroyRole(Role $role)
     {
-        $role = Role::findOrFail($id);
-        $role->delete();
+        $this->roleService->deleteRole($role);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle supprimé avec succès.');
+        return redirect()->route('admin.role.index')->with('success', 'Rôle supprimé avec succès.');
     }
 
-    public function listeCours()
+
+    /**
+     * Liste les types de cours
+     */
+    public function listeTypesCours()
     {
-        $matieres = Matiere::all();
         $typesCours = TypeCours::all();
-
-        return view('admin.listeCours', compact('matieres', 'typesCours'));
+        return view('Admin.listeTypesCours', compact('typesCours'));
     }
-    // Affiche le formulaire pour ajouter un cours ou un type de cours
-    public function indexCours()
+
+    /**
+     * Affiche le formulaire de création d'un type de cours
+     */
+    public function createTypeCours()
     {
-        return view('admin.formCours');
+        return view('Admin.formTypeCours');
     }
 
-    public function storeCours(Request $request)
+    /**
+     * Crée un nouveau type de cours
+     */
+    public function storeTypeCours(StoreTypeCoursRequest $request)
     {
-        $request->validate([
-            'nom_matiere' => 'required|string|max:255|unique:matieres,nom_matiere'
-        ]);
+        $this->typeCoursService->createTypeCours($request->validated());
 
-        Matiere::create([
-            'nom_matiere' => $request->nom_matiere
-        ]);
-
-        return redirect()->route('admin.cours.index')
-            ->with('success', 'Cours ajouté avec succès.');
+        return redirect()->route('admin.types-cours.index')->with('success', 'Type de cours créé avec succès.');
     }
-    public function storeTypeCours(Request $request)
+
+    /**
+     * Affiche le formulaire d'édition d'un type de cours
+     */
+    public function editTypeCours(TypeCours $type)
     {
-        $request->validate([
-            'nom_type_cours' => 'required|string|max:255|unique:type_cours,nom_type_cours'
-        ]);
-
-        TypeCours::create([
-            'nom_type_cours' => $request->nom_type_cours
-        ]);
-
-        return redirect()->route('admin.cours.index')
-            ->with('success', 'Type de cours ajouté avec succès.');
+        return view('Admin.editTypeCours', compact('type'));
     }
-    public function editCours($id)
+
+    /**
+     * Met à jour un type de cours existant
+     */
+    public function updateTypeCours(UpdateTypeCoursRequest $request, TypeCours $type)
     {
-        $matiere = Matiere::findOrFail($id);
-        return view('admin.editCoursType', compact('matiere'));
+        try {
+            $this->typeCoursService->updateTypeCours($type, $request->validated());
+            return redirect()->route('admin.types-cours.index')->with('success', 'Type de cours mis à jour avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Erreur lors de la mise à jour du type de cours: '.$e->getMessage()]);
+        }
     }
 
-    public function updateCours(Request $request, $id)
+    /**
+     * Supprime un type de cours
+     */
+    public function destroyTypeCours(TypeCours $type)
     {
-        $request->validate([
-            'nom_matiere' => 'required|string|max:255|unique:matieres,nom_matiere,' . $id
-        ]);
-
-        $matiere = Matiere::findOrFail($id);
-        $matiere->update([
-            'nom_matiere' => $request->nom_matiere
-        ]);
-
-        // Correction du nom de la route
-        return redirect()->route('admin.cours.index')->with('success', 'Cours modifié.');
+        try {
+            $this->typeCoursService->deleteTypeCours($type);
+            return redirect()->route('admin.types-cours.index')->with('success', 'Type de cours supprimé avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.types-cours.index')->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
-    public function editTypeCours($id)
-    {
-        $type = TypeCours::findOrFail($id);
-        return view('admin.editCoursType', compact('type'));
-    }
-
-    public function updateTypeCours(Request $request, $id)
-    {
-        $request->validate([
-            'nom_type_cours' => 'required|string|max:255|unique:type_cours,nom_type_cours,' . $id
-        ]);
-
-        $type = TypeCours::findOrFail($id);
-        $type->update([
-            'nom_type_cours' => $request->nom_type_cours
-        ]);
-
-        // Correction du nom de la route
-        return redirect()->route('admin.cours.index')->with('success', 'Type de cours modifié.');
-    }
-    public function destroyCours($id)
-    {
-        $matiere = Matiere::findOrFail($id);
-        $matiere->delete();
-
-        return back()->with('success', 'Cours supprimé.');
-    }
-    public function destroyTypeCours($id)
-    {
-        $type = TypeCours::findOrFail($id);
-        $type->delete();
-
-        return back()->with('success', 'Type de cours supprimé.');
-    }
-
+    /**
+     * Liste les classes
+     */
     public function listeClasse()
     {
-        $classes = Classe::all();
-        return view('admin.listeClasse', compact('classes'));
+        $classes = $this->classeService->getAllClasses();
+
+        return view('Admin.listeClasse', compact('classes'));
     }
 
-
+    /**
+     * Affiche le formulaire de création d'une classe
+     */
     public function createClasse()
     {
-        return view('admin.formClasse');
-    }
-
-    public function storeClasse(Request $request)
-    {
-        $request->validate([
-            'nom_classe' => 'required|string|max:255|unique:classes,nom_classe',
-        ]);
-
-        Classe::create([
-            'nom_classe' => $request->nom_classe,
-        ]);
-
-        return redirect()->route('admin.classes.index')
-            ->with('success', 'Classe ajoutée avec succès.');
-    }
-
-
-    public function editClasse($id)
-    {
-        $classe = Classe::findOrFail($id);
-        return view('admin.editClasse', compact('classe'));
-    }
-
-
-    public function updateClasse(Request $request, $id)
-    {
-        $request->validate([
-            'nom_classe' => 'required|string|max:255|unique:classes,nom_classe,' . $id,
-        ]);
-
-        $classe = Classe::findOrFail($id);
-        $classe->update([
-            'nom_classe' => $request->nom_classe,
-        ]);
-
-        return redirect()->route('classe.liste')->with('success', 'Classe mise à jour.');
-    }
-
-
-public function destroyClasse($id)
-{
-    $classe = Classe::findOrFail($id);
-    $classe->delete();
-
-    return redirect()->route('classe.liste')->with('success', 'Classe supprimée.');
-}
-
-    /**
-        * Affiche le formulaire pour assigner un parent à un étudiant.
-     */
-    public function formAssignerParent(Etudiant $etudiant)
-    {
-        $parents = User::whereHas('role', function ($query) {
-            $query->where('nom_role', 'parent');
-        })->get();
-
-        return view('admin.formAssignerParent', compact('etudiant', 'parents'));
+        return view('Admin.formClasse');
     }
 
     /**
-     * Assigne un parent à un étudiant.
+     * Crée une nouvelle classe
      */
-    public function assignerParent(Request $request, Etudiant $etudiant)
+    public function storeClasse(StoreClasseRequest $request)
     {
-        $request->validate([
-            'parent_id' => 'required|exists:users,id',
-        ]);
+        $this->classeService->createClasse($request->validated());
 
-        $parentUser = User::find($request->parent_id);
-
-        if ($parentUser && $parentUser->parent) {
-            $etudiant->parents()->syncWithoutDetaching([$parentUser->parent->id]);
-        } else {
-            return redirect()->back()->with('error', 'Le parent sélectionné n\'est pas valide.');
-        }
-
-        return redirect()->route('admin.user.index')->with('success', 'Parent assigné avec succès.');
+        return redirect()->route('admin.classes.index')->with('success', 'Classe créée avec succès.');
     }
 
-    // CRUD pour les statuts de séance
+    /**
+     * Affiche le formulaire d'édition d'une classe
+     */
+    public function editClasse(Classe $classe)
+    {
+        return view('Admin.editClasse', compact('classe'));
+    }
+
+    /**
+     * Met à jour une classe existante
+     */
+    public function updateClasse(UpdateClasseRequest $request, Classe $classe)
+    {
+        $this->classeService->updateClasse($classe, $request->validated());
+
+        return redirect()->route('admin.classes.index')->with('success', 'Classe mise à jour avec succès.');
+    }
+
+    /**
+     * Supprime une classe
+     */
+    public function destroyClasse(Classe $classe)
+    {
+        $this->classeService->deleteClasse($classe);
+
+        return redirect()->route('admin.classes.index')->with('success', 'Classe supprimée avec succès.');
+    }
+
+    /**
+     * Liste les statuts de séance
+     */
     public function listeStatutSeance()
     {
         $statuts = StatutSeance::all();
-        return view('admin.listeStatutSeance', compact('statuts'));
+
+        return view('Admin.listeStatutSeance', compact('statuts'));
     }
 
-
+    /**
+     * Affiche le formulaire de création d'un statut de séance
+     */
     public function createStatutSeance()
     {
-        return view('admin.formStatutSeance');
+        return view('Admin.formStatutSeance');
     }
 
-
+    /**
+     * Crée un nouveau statut de séance
+     */
     public function storeStatutSeance(Request $request)
     {
         $request->validate([
-            'nom_seance' => 'required|string|max:255|unique:statut_seances,nom_seance',
+            'nom_statut_seance' => 'required|string|max:255|unique:statut_seances,nom_statut_seance',
         ]);
 
-        StatutSeance::create([
-            'nom_seance' => $request->nom_seance,
-        ]);
+        StatutSeance::create($request->only(['nom_statut_seance']));
 
-        return redirect()->route('admin.statut-seances.index')
-            ->with('success', 'Statut de séance ajouté avec succès.');
+        return redirect()->route('admin.statut-seances.index')->with('success', 'Statut de séance créé avec succès.');
     }
 
-
-    public function editStatutSeance($id)
+    /**
+     * Affiche le formulaire d'édition d'un statut de séance
+     */
+    public function editStatutSeance(StatutSeance $statut)
     {
-        $statut = StatutSeance::findOrFail($id);
-        return view('admin.editStatutSeance', compact('statut'));
+        return view('Admin.editStatutSeance', compact('statut'));
     }
 
-
-    public function updateStatutSeance(Request $request, $id)
+    /**
+     * Met à jour un statut de séance existant
+     */
+    public function updateStatutSeance(Request $request, StatutSeance $statut)
     {
         $request->validate([
-            'nom_seance' => 'required|string|max:255|unique:statut_seances,nom_seance,' . $id,
+            'nom_statut_seance' => 'required|string|max:255|unique:statut_seances,nom_statut_seance,'.$statut->id,
         ]);
 
-        $statut = StatutSeance::findOrFail($id);
-        $statut->update([
-            'nom_seance' => $request->nom_seance,
-        ]);
+        $statut->update($request->only(['nom_statut_seance']));
 
-        return redirect()->route('statutseance.liste')->with('success', 'Statut de séance mis à jour.');
+        return redirect()->route('admin.statut-seances.index')->with('success', 'Statut de séance mis à jour avec succès.');
     }
 
-
-    public function destroyStatutSeance($id)
+    /**
+     * Supprime un statut de séance
+     */
+    public function destroyStatutSeance(StatutSeance $statut)
     {
-        $statut = StatutSeance::findOrFail($id);
         $statut->delete();
 
-        return redirect()->route('statutseance.liste')->with('success', 'Statut de séance supprimé.');
+        return redirect()->route('admin.statut-seances.index')->with('success', 'Statut de séance supprimé avec succès.');
     }
 
+    /**
+     * Liste les statuts de présence
+     */
     public function indexStatutPresence()
     {
         $statutPresences = StatutPresence::all();
-        return view('admin.listeStatutPresence', compact('statutPresences'));
+
+        return view('Admin.listeStatutPresence', compact('statutPresences'));
     }
 
-
+    /**
+     * Affiche le formulaire de création d'un statut de présence
+     */
     public function createStatutPresence()
     {
-        return view('admin.formStatutPresence');
+        return view('Admin.formStatutPresence');
     }
 
-
+    /**
+     * Crée un nouveau statut de présence
+     */
     public function storeStatutPresence(Request $request)
     {
         $request->validate([
-            'nom_statut_presence' => 'required|string|max:255',
+            'nom_statut_presence' => 'required|string|max:255|unique:statut_presences,nom_statut_presence',
         ]);
 
-        StatutPresence::create([
-            'nom_statut_presence' => $request->nom_statut_presence,
-        ]);
+        StatutPresence::create($request->only(['nom_statut_presence']));
 
-        return redirect()->route('admin.statut-presences.index')
-            ->with('success', 'Statut présence ajouté.');
+        return redirect()->route('admin.statut-presences.index')->with('success', 'Statut de présence créé avec succès.');
     }
 
-
-    public function editStatutPresence($id)
+    /**
+     * Affiche le formulaire d'édition d'un statut de présence
+     */
+    public function editStatutPresence(StatutPresence $statut)
     {
-        $statutPresence = StatutPresence::findOrFail($id);
-        return view('admin.editStatutPresence', compact('statutPresence'));
+        return view('Admin.editStatutPresence', compact('statut'));
     }
 
-
-    public function updateStatutPresence(Request $request, $id)
+    /**
+     * Met à jour un statut de présence existant
+     */
+    public function updateStatutPresence(Request $request, StatutPresence $statut)
     {
         $request->validate([
-            'nom_statut_presence' => 'required|string|max:255',
+            'nom_statut_presence' => 'required|string|max:255|unique:statut_presences,nom_statut_presence,'.$statut->id,
         ]);
 
-        $statutPresence = StatutPresence::findOrFail($id);
-        $statutPresence->update([
-            'nom_statut_presence' => $request->nom_statut_presence,
-        ]);
+        $statut->update($request->only(['nom_statut_presence']));
 
-        // Correction du nom de la route
-        return redirect()->route('admin.statut-presences.index')->with('success', 'Statut présence modifié.');
+        return redirect()->route('admin.statut-presences.index')->with('success', 'Statut de présence mis à jour avec succès.');
     }
 
-
-    public function destroyStatutPresence($id)
+    /**
+     * Supprime un statut de présence
+     */
+    public function destroyStatutPresence(StatutPresence $statut)
     {
-        StatutPresence::findOrFail($id)->delete();
-        return redirect()->route('admin.statut-presence.index')->with('success', 'Statut présence supprimé.');
+        $statut->delete();
+
+        return redirect()->route('admin.statut-presences.index')->with('success', 'Statut de présence supprimé avec succès.');
     }
 
-    //CRUD pour les années académiques
-   public function indexAnnee()
-{
-    $annees = AnneeAcademique::withCount('semestres')->get();
-    return view('admin.listeAnneeAcademique', compact('annees'));
-}
+    /**
+     * Affiche le formulaire d'assignation d'un parent à un étudiant
+     */
+    public function formAssignerParent(Etudiant $etudiant)
+    {
+        // Récupérer les utilisateurs avec le rôle parent
+        $usersParents = $this->userService->getUsersByRole('parent');
 
-public function createAnnee()
-{
-    return view('admin.formAnneeAcademique');
-}
+        // Récupérer les objets Parents correspondants
+        $parents = [];
+        foreach ($usersParents as $user) {
+            if ($user->parent) {
+                $parents[] = [
+                    'id' => $user->parent->id,
+                    'nom' => $user->nom,
+                    'email' => $user->email
+                ];
+            }
+        }
 
-public function storeAnnee(Request $request)
-{
-    $request->validate(['annee' => 'required|string']);
-    AnneeAcademique::create($request->only('annee'));
+        return view('Admin.formAssignerParent', compact('etudiant', 'parents'));
+    }
 
-    return redirect()->route('admin.annees.create')->with('success', 'Année créée.');
-}
+    /**
+     * Assigne un parent à un étudiant
+     */
+    public function assignerParent(AssignerParentRequest $request, Etudiant $etudiant)
+    {
+        $this->etudiantService->assignerParent($etudiant->id, $request->parent_id);
 
-public function editAnnee($id)
-{
-    $annee = AnneeAcademique::findOrFail($id);
-    return view('admin.editAnneeAcademique', compact('annee'));
-}
+        return redirect()->route('admin.user.index', ['roleName' => 'etudiant'])
+            ->with('success', 'Parent assigné avec succès.');
+    }
 
-public function updateAnnee(Request $request, $id)
-{
-    $request->validate(['annee' => 'required|string']);
-    $annee = AnneeAcademique::findOrFail($id);
-    $annee->update($request->only('annee'));
+    /**
+     * Liste les années académiques
+     */
+    public function indexAnnee()
+    {
+        $annees = $this->anneeAcademiqueService->getAllAnnees();
 
-    return redirect()->route('admin.annees.index')->with('success', 'Année mise à jour.');
-}
+        return view('Admin.listeAnneeAcademique', compact('annees'));
+    }
 
-public function destroyAnnee($id)
-{
-    $annee = AnneeAcademique::findOrFail($id);
-    $annee->delete();
+    /**
+     * Affiche le formulaire de création d'une année académique
+     */
+    public function createAnnee()
+    {
+        return view('Admin.formAnneeAcademique');
+    }
 
-    return redirect()->route('admin.annees.index')->with('success', 'Année supprimée.');
-}
+    /**
+     * Crée une nouvelle année académique
+     */
+    public function storeAnnee(StoreAnneeAcademiqueRequest $request)
+    {
+        $this->anneeAcademiqueService->createAnnee($request->validated());
 
+        return redirect()->route('admin.annees.index')->with('success', 'Année créée.');
+    }
 
+    /**
+     * Affiche le formulaire d'édition d'une année académique
+     */
+    public function editAnnee($id)
+    {
+        $annee = AnneeAcademique::findOrFail($id);
 
+        return view('Admin.editAnneeAcademique', compact('annee'));
+    }
 
+    /**
+     * Met à jour une année académique existante
+     */
+    public function updateAnnee(UpdateAnneeAcademiqueRequest $request, $id)
+    {
+        $this->anneeAcademiqueService->updateAnnee($id, $request->validated());
 
-    //CRUD pour les semestres
-    // Affiche la liste des semestres
+        return redirect()->route('admin.annees.index')->with('success', 'Année mise à jour.');
+    }
+
+    /**
+     * Supprime une année académique
+     */
+    public function destroyAnnee($id)
+    {
+        $this->anneeAcademiqueService->deleteAnnee($id);
+
+        return redirect()->route('admin.annees.index')->with('success', 'Année supprimée.');
+    }
+
+    /**
+     * Liste les semestres
+     */
     public function indexSemestre()
-{
-    $semestres = Semestre::with('anneeAcademique')->get();
-    return view('admin.listeSemestres', compact('semestres'));
-}
+    {
+        $semestres = $this->semestreService->getAllSemestres();
 
-public function createSemestre()
-{
-    $annees = AnneeAcademique::all();
-    return view('admin.formSemestres', compact('annees'));
-}
+        return view('Admin.listeSemestres', compact('semestres'));
+    }
 
-public function storeSemestre(Request $request)
-{
-    $request->validate([
-        'nom' => 'required|string',
-        'date_debut_semestre' => 'required|date',
-        'date_fin_semestre' => 'required|date|after_or_equal:date_debut_semestre',
-        'annees_academiques_id' => 'required|exists:annees_academiques,id',
-    ]);
+    /**
+     * Affiche le formulaire de création d'un semestre
+     */
+    public function createSemestre()
+    {
+        $annees = AnneeAcademique::all();
 
-    Semestre::create($request->all());
+        return view('Admin.formSemestres', compact('annees'));
+    }
 
-    return redirect()->route('admin.semestres.index')
+    /**
+     * Crée un nouveau semestre
+     */
+    public function storeSemestre(StoreSemestreRequest $request)
+    {
+        $this->semestreService->createSemestre($request->validated());
+
+        return redirect()->route('admin.semestres.index')
             ->with('success', 'Semestre créé avec succès.');
-}
+    }
 
-public function editSemestre($id)
-{
-    $semestre = Semestre::findOrFail($id);
-    $annees = AnneeAcademique::all();
-    return view('admin.editSemestres', compact('semestre', 'annees'));
-}
+    /**
+     * Affiche le formulaire d'édition d'un semestre
+     */
+    public function editSemestre($id)
+    {
+        $semestre = Semestre::findOrFail($id);
+        $annees = AnneeAcademique::all();
 
-public function updateSemestre(Request $request, $id)
-{
-    $request->validate([
-        'nom' => 'required|string',
-        'date_debut_semestre' => 'required|date',
-        'date_fin_semestre' => 'required|date|after_or_equal:date_debut_semestre',
-        'annees_academiques_id' => 'required|exists:annees_academiques,id',
-    ]);
+        return view('Admin.editSemestres', compact('semestre', 'annees'));
+    }
 
-    $semestre = Semestre::findOrFail($id);
-    $semestre->update($request->all());
+    /**
+     * Met à jour un semestre existant
+     */
+    public function updateSemestre(UpdateSemestreRequest $request, $id)
+    {
+        $this->semestreService->updateSemestre($id, $request->validated());
 
-    return redirect()->route('admin.semestres.index')
+        return redirect()->route('admin.semestres.index')
             ->with('success', 'Semestre mis à jour avec succès.');
-}
+    }
 
-public function destroySemestre($id)
-{
-    $semestre = Semestre::findOrFail($id);
-    $semestre->delete();
+    /**
+     * Supprime un semestre
+     */
+    public function destroySemestre($id)
+    {
+        $this->semestreService->deleteSemestre($id);
 
-    return redirect()->route('admin.semestres.index')
+        return redirect()->route('admin.semestres.index')
             ->with('success', 'Semestre supprimé avec succès.');
-}
+    }
 
+    /**
+     * Liste les matières
+     */
+    public function listeMatieres()
+    {
+        $matieres = $this->matiereService->getAllMatieres();
+        return view('Admin.listeMatieres', compact('matieres'));
+    }
+
+    /**
+     * Affiche le formulaire de création d'une matière
+     */
+    public function createMatiere()
+    {
+        return view('Admin.formMatiere');
+    }
+
+    /**
+     * Crée une nouvelle matière
+     */
+    public function storeMatiere(StoreMatiereRequest $request)
+    {
+        try {
+            $this->matiereService->createMatiere($request->validated());
+
+            return redirect()->route('admin.matieres.index')->with('success', 'Matière créée avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Erreur lors de la création de la matière: '.$e->getMessage()]);
+        }
+    }
+
+    /**
+     * Affiche le formulaire d'édition d'une matière
+     */
+    public function editMatiere(Matiere $matiere)
+    {
+        return view('Admin.editMatiere', compact('matiere'));
+    }
+
+    /**
+     * Met à jour une matière existante
+     */
+    public function updateMatiere(UpdateMatiereRequest $request, Matiere $matiere)
+    {
+        try {
+            $this->matiereService->updateMatiere($matiere, $request->validated());
+
+            return redirect()->route('admin.matieres.index')->with('success', 'Matière mise à jour avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.matieres.index')->withErrors(['error' => 'Erreur lors de la mise à jour de la matière: '.$e->getMessage()]);
+        }
+    }
+
+    /**
+     * Supprime une matière
+     */
+    public function destroyMatiere(Matiere $matiere)
+    {
+        try {
+            $this->matiereService->deleteMatiere($matiere);
+
+            return redirect()->route('admin.matieres.index')->with('success', 'Matière supprimée avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.matieres.index')->withErrors(['error' => 'Erreur lors de la suppression de la matière: '.$e->getMessage()]);
+        }
+    }
 }

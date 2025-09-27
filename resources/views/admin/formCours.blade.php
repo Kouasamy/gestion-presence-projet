@@ -1,18 +1,20 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des cours')
+@section('title', 'Ajouter un Cours')
 
 @section('content')
 <div class="form-wrapper">
     <div class="form-card">
         <div class="form-header">
-            <h2 class="text-white text-xl">Ajouter un cours</h2>
-            <a href="{{ route('admin.cours.index') }}">
-                Liste des cours
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
+            <h2 class="text-white text-xl">Ajouter un Cours</h2>
+            <div class="flex gap-2">
+                <a href="{{ route('admin.cours.index') }}">
+                    Liste des cours
+                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
 
         @if ($errors->any())
@@ -31,51 +33,54 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Formulaire pour ajouter un cours -->
-            <div>
-                <h3 class="text-white text-lg mb-4">Nouveau cours</h3>
-                <form action="{{ route('admin.cours.store') }}" method="POST">
-                    @csrf
-                    <div>
-                        <label for="nom_matiere" class="form-label">Nom du cours</label>
-                        <input type="text"
-                               name="nom_matiere"
-                               id="nom_matiere"
-                               class="form-input"
-                               placeholder="Entrez le nom du cours"
-                               value="{{ old('nom_matiere') }}"
-                               required>
-                    </div>
+        <form action="{{ route('admin.cours.store') }}" method="POST">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="nom_matiere" class="form-label">Nom du cours</label>
+                    <input type="text"
+                           name="nom_matiere"
+                           id="nom_matiere"
+                           class="form-input"
+                           placeholder="Entrez le nom du cours"
+                           value="{{ old('nom_matiere') }}"
+                           required>
+                </div>
 
-                    <button type="submit" class="form-button">
-                        Ajouter le cours
-                    </button>
-                </form>
+                <div>
+                    <label for="type_cours_id" class="form-label">Type de cours</label>
+                    <select name="type_cours_id" id="type_cours_id" class="form-input" required>
+                        <option value="">Sélectionnez un type de cours</option>
+                        @foreach($typesCours as $type)
+                            <option value="{{ $type->id }}" {{ old('type_cours_id') == $type->id ? 'selected' : '' }}>
+                                {{ $type->nom_type_cours }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="text-xs text-gray-400 mt-1">
+                        <a href="{{ route('admin.types-cours.create') }}" class="text-blue-400 hover:text-blue-500">
+                            + Ajouter un nouveau type de cours
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <!-- Formulaire pour ajouter un type de cours -->
-            <div>
-                <h3 class="text-white text-lg mb-4">Nouveau type de cours</h3>
-                <form action="{{ route('admin.cours.types.store') }}" method="POST">
-                    @csrf
-                    <div>
-                        <label for="nom_type_cours" class="form-label">Nom du type de cours</label>
-                        <input type="text"
-                               name="nom_type_cours"
-                               id="nom_type_cours"
-                               class="form-input"
-                               placeholder="Entrez le type de cours"
-                               value="{{ old('nom_type_cours') }}"
-                               required>
-                    </div>
-
-                    <button type="submit" class="form-button">
-                        Ajouter le type
-                    </button>
-                </form>
+            <div class="mt-4">
+                <label for="description" class="form-label">Description (optionnelle)</label>
+                <textarea name="description"
+                          id="description"
+                          class="form-input"
+                          rows="3"
+                          placeholder="Description du cours">{{ old('description') }}</textarea>
             </div>
-        </div>
+
+            <div class="flex justify-end mt-6">
+                <button type="submit" class="form-button">
+                    <i class="fas fa-save mr-2"></i>
+                    Enregistrer le cours
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

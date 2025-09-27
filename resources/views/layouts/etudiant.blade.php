@@ -17,17 +17,68 @@
 
 
     <!-- Scripts and Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/style.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/style.css', 'resources/css/responsive.css'])
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu-overlay" class="mobile-menu-overlay"></div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu">
+            <div class="mobile-menu-header">
+                <img src="https://www.ifran-ci.com/parent/img/logo-ifran-actualise.jpg" alt="Logo" />
+            </div>
+
+            <ul>
+                <!-- Dashboard -->
+                <li class="{{ request()->routeIs('etudiant.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('etudiant.dashboard') }}" class="{{ request()->routeIs('etudiant.dashboard') ? 'active' : '' }}">
+                        <i class="fa-solid fa-gauge"></i>
+                        <span>Tableau de bord</span>
+                    </a>
+                </li>
+
+                <!-- Emploi du temps -->
+                <li class="{{ request()->routeIs('etudiant.emploi') ? 'active' : '' }}">
+                    <a href="{{ route('etudiant.emploi') }}" class="{{ request()->routeIs('etudiant.emploi') ? 'active' : '' }}">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Emploi du temps</span>
+                    </a>
+                </li>
+
+                <!-- Absences -->
+                <li class="{{ request()->routeIs('etudiant.absences') ? 'active' : '' }}">
+                    <a href="{{ route('etudiant.absences') }}" class="{{ request()->routeIs('etudiant.absences') ? 'active' : '' }}">
+                        <i class="fa-solid fa-user-clock"></i>
+                        <span>Mes absences</span>
+                    </a>
+                </li>
+
+                <!-- Assiduité -->
+                <li class="{{ request()->routeIs('etudiant.assiduite') ? 'active' : '' }}">
+                    <a href="{{ route('etudiant.assiduite') }}" class="{{ request()->routeIs('etudiant.assiduite') ? 'active' : '' }}">
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                        <span>Assiduité</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
         <!-- Header -->
         <header class="header">
             <div class="logo">
                 <img src="https://www.ifran-ci.com/parent/img/logo-ifran-actualise.jpg" alt="Logo" class="logo-icon" />
             </div>
 
-            <nav class="nav-menu">
+            <!-- Burger Menu Button -->
+            <button id="burger-menu-button" class="burger-menu-button" aria-expanded="false" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="nav-menu desktop-nav">
     <div class="nav-menu-container">
         <ul>
             <!-- Dashboard -->
@@ -65,8 +116,8 @@
                 <x-notification-dropdown :notifications="$droppedSubjects ?? collect([])" />
 
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('profile.edit') }}" class="icon-btn" title="Mon profil">
-                        <i class="fa-solid fa-user" style="font-size: 20px; color: white;"></i>
+                    <a href="{{ route('profile.edit') }}" title="Mon profil">
+                        <img class="user-avatar" src="{{ Auth::user()->photo_url }}" alt="{{ Auth::user()->nom }}" />
                     </a>
 
                     <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -103,5 +154,56 @@
     </div>
 
     @stack('scripts')
+
+    <!-- Menu Burger Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sélectionner les éléments du menu
+            const burgerButton = document.getElementById('burger-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+            // Fonction pour basculer l'état du menu
+            function toggleMenu() {
+                const isOpen = mobileMenu.classList.contains('open');
+
+                if (isOpen) {
+                    // Fermer le menu
+                    mobileMenu.classList.remove('open');
+                    mobileMenuOverlay.classList.remove('active');
+                    document.body.classList.remove('menu-open');
+                    burgerButton.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Ouvrir le menu
+                    mobileMenu.classList.add('open');
+                    mobileMenuOverlay.classList.add('active');
+                    document.body.classList.add('menu-open');
+                    burgerButton.setAttribute('aria-expanded', 'true');
+                }
+            }
+
+            // Ajouter les écouteurs d'événements
+            if (burgerButton) {
+                burgerButton.addEventListener('click', toggleMenu);
+            }
+
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', toggleMenu);
+            }
+
+            // Fermer le menu lorsqu'un lien est cliqué
+            const mobileMenuLinks = mobileMenu ? mobileMenu.querySelectorAll('a') : [];
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', toggleMenu);
+            });
+
+            // Fermer le menu lorsque la fenêtre est redimensionnée à une taille plus grande
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768 && mobileMenu && mobileMenu.classList.contains('open')) {
+                    toggleMenu();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -23,10 +23,10 @@
                 @endif
 
                 <div class="overflow-x-auto">
-                    <table class="custom-table">
+                    <table class="custom-table w-full admin-classe-table">
                         <thead>
                             <tr>
-                              
+
                                 <th>Nom de la classe</th>
                                 <th>Nombre d'étudiants</th>
                                 <th>Actions</th>
@@ -35,21 +35,21 @@
                         <tbody>
                             @foreach($classes as $classe)
                                 <tr>
-                                    
-                                    <td>{{ $classe->nom_classe }}</td>
-                                    <td>
+
+                                    <td data-label="Nom de la classe">{{ $classe->nom_classe }}</td>
+                                    <td data-label="Nombre d'étudiants">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             {{ $classe->etudiants_count ?? 0 }} étudiants
                                         </span>
                                     </td>
-                                    <td class="flex gap-2">
-                                        <a href="{{ route('admin.classes.edit', $classe->id) }}" 
+                                    <td data-label="Actions" class="flex gap-2">
+                                        <a href="{{ route('admin.classes.edit', $classe->id) }}"
                                            class="custom-button bg-yellow-500 hover:bg-yellow-600">
                                             <i class="fas fa-edit mr-2"></i>
                                             Modifier
                                         </a>
-                                        <form action="{{ route('admin.classes.destroy', $classe->id) }}" 
-                                              method="POST" 
+                                        <form action="{{ route('admin.classes.destroy', $classe->id) }}"
+                                              method="POST"
                                               class="inline-block"
                                               onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette classe ?')">
                                             @csrf

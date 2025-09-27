@@ -17,4 +17,4 @@ class NotificationDropdown extends Component
     {
         return view('components.notification-dropdown');
     }
-} 
+}

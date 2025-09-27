@@ -4,17 +4,22 @@
 
 @section('content')
 <div class="form-wrapper">
-    <div class="form-container">
-        <a href="{{ route('admin.statut-seances.index') }}" class="student-list-link">
-            Liste des statuts de séance
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M10 17l5-5-5-5v10z" />
-            </svg>
-        </a>
+    <div class="form-card">
+        <div class="form-header">
+            <h2 class="text-white text-xl">Modifier un statut de séance</h2>
+            <div class="flex gap-2">
+                <a href="{{ route('admin.statut-seances.index') }}">
+                    Liste des statuts de séance
+                    <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
 
         @if ($errors->any())
-            <div class="error-box">
-                <ul>
+            <div class="form-error">
+                <ul class="list-disc list-inside">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -23,39 +28,51 @@
         @endif
 
         @if (session('success'))
-            <div class="error-box success-box">
+            <div class="form-success">
                 {{ session('success') }}
-        </div>
+            </div>
         @endif
 
         <form action="{{ route('admin.statut-seances.update', $statut->id) }}" method="POST" novalidate>
-    @csrf
-    @method('PUT')
+            @csrf
+            @method('PUT')
 
-            <div class="mb-4">
-                <label for="nom_seance" class="block text-sm font-medium text-white mb-2">
-                    Nom de la séance
-                </label>
+            <div>
+                <label for="nom_statut_seance" class="form-label">Nom du statut</label>
                 <input type="text"
-                       name="nom_seance"
-                       id="nom_seance"
-                       value="{{ old('nom_seance', $statut->nom_seance) }}"
-                       placeholder="Entrez le nom de la séance"
+                       name="nom_statut_seance"
+                       id="nom_statut_seance"
+                       value="{{ old('nom_statut_seance', $statut->nom_statut_seance) }}"
+                       placeholder="Entrez le nom du statut"
                        required
-                       class="w-full px-4 py-2 rounded-lg border-0 focus:ring-2 focus:ring-blue-500 text-black"  />
+                       class="form-input">
 
-    @error('nom_seance')
+                @error('nom_statut_seance')
                     <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-    @enderror
+                @enderror
             </div>
 
-            <div class="flex justify-center">
-                <button type="submit" class="custom-button">
+            <div class="mt-4">
+                <label for="couleur" class="form-label">Couleur</label>
+                <input type="color"
+                       name="couleur"
+                       id="couleur"
+                       value="{{ old('couleur', $statut->couleur ?? '#3490dc') }}"
+                       required
+                       class="form-input h-10">
+
+                @error('couleur')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button type="submit" class="form-button">
                     <i class="fas fa-save mr-2"></i>
                     Mettre à jour
                 </button>
             </div>
-</form>
+        </form>
     </div>
 </div>
 @endsection

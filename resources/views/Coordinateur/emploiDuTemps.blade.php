@@ -125,7 +125,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Motif du report</label>
-                <textarea name="motif_report" class="w-full border-gray-300 rounded-md shadow-sm" rows="3" required></textarea>
+                <textarea name="motif" class="w-full border-gray-300 rounded-md shadow-sm" rows="3" required></textarea>
             </div>
 
             <div class="flex justify-end gap-3 mt-6">

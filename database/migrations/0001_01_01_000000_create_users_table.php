@@ -18,10 +18,17 @@ return new class extends Migration
             $table->string('photo_path')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('role_id')->constrained('roles');
+            $table->unsignedBigInteger('role_id');
 
             $table->rememberToken();
             $table->timestamps();
+
+            $table->index('role_id');
+        });
+
+        // Ajouter la contrainte de clé étrangère après la création des tables
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('restrict');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

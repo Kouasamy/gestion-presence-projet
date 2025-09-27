@@ -17,7 +17,7 @@
                         <select name="parent_id" id="parent_id" class="form-input w-full" required>
                             <option value="">Sélectionner un parent</option>
                             @foreach($parents as $parent)
-                                <option value="{{ $parent->id }}">{{ $parent->nom }}</option>
+                                <option value="{{ $parent['id'] }}">{{ $parent['nom'] }}</option>
                             @endforeach
                         </select>
                     </div>

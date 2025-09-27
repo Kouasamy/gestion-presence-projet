@@ -129,7 +129,7 @@
             <h3 class="text-lg font-medium text-gray-900 mb-4">
                 Justifier une absence
             </h3>
-            <form method="POST" id="justification_form" class="space-y-4">
+            <form method="POST" id="justification_form" class="space-y-4" enctype="multipart/form-data">
                 @csrf
                 <div>
                     <label for="motif" class="block text-sm font-medium text-gray-700 mb-1">
@@ -152,6 +152,18 @@
                            class="form-input w-full"
                            value="{{ date('Y-m-d') }}"
                            required>
+                </div>
+
+                <div>
+                    <label for="document" class="block text-sm font-medium text-gray-700 mb-1">
+                        Document justificatif (PDF, JPG, PNG) - Optionnel
+                    </label>
+                    <input type="file"
+                           id="document"
+                           name="document"
+                           class="form-input w-full"
+                           accept=".pdf,.jpg,.jpeg,.png">
+                    <p class="text-xs text-gray-500 mt-1">Taille maximale: 2 Mo</p>
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6">

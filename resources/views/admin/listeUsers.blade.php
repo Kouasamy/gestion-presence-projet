@@ -40,11 +40,7 @@
                                     <tr>
 
                                         <td>
-                                            @if($user->photo_path)
-                                                <img src="{{ asset('storage/' . $user->photo_path) }}" alt="Photo de {{ $user->nom }}" class="w-10 h-10 rounded-full object-cover" />
-                                            @else
-                                                <span class="text-gray-400">Aucune photo</span>
-                                            @endif
+                                            <img src="{{ $user->photo_url }}" alt="Photo de {{ $user->nom }}" class="w-10 h-10 rounded-full object-cover" />
                                         </td>
                                         <td>{{ $user->nom }}</td>
                                         <td>{{ $user->email }}</td>

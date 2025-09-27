@@ -13,9 +13,14 @@
                     </h1>
                     <div class="flex items-center space-x-4">
                         @if(isset($classe))
-                            <span class="text-lg text-gray-600">
-                                Classe : {{ $classe->nom_classe }}
-                            </span>
+                            <div class="flex flex-col">
+                                <span class="text-lg text-gray-600">
+                                    Classe : {{ $classe->nom_classe }}
+                                </span>
+                                <span class="text-md text-[#e11d48] font-medium">
+                                    Semaine du {{ Carbon\Carbon::now()->startOfWeek()->format('d/m/Y') }} au {{ Carbon\Carbon::now()->endOfWeek()->format('d/m/Y') }}
+                                </span>
+                            </div>
                         @endif
                     </div>
                 </div>

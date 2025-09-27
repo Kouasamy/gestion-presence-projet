@@ -9,8 +9,12 @@ class JustificationAbsence extends Model
     protected $fillable = [
         'presence_id',
         'motif',
-        'date_justification'
+        'date_justification',
+        'document_path',
     ];
-public function presence() { return $this->belongsTo(Presence::class); }
 
+    public function presence()
+    {
+        return $this->belongsTo(Presence::class);
+    }
 }

@@ -15,7 +15,7 @@ class IsEtudiant
      */
     public function handle(Request $request, Closure $next): Response
     {
-       if ($request->user() && $request->user()->role()->where('nom_role', 'etudiant')->exists()) {
+        if ($request->user() && $request->user()->role()->where('nom_role', 'etudiant')->exists()) {
             return $next($request);
         }
 

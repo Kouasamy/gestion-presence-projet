@@ -1,61 +1,280 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Système de Gestion de Présence des Étudiants - IFRAN
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Ce projet est une application web développée pour digitaliser le relevé des présences des étudiants de l'IFRAN. L'application permet de gérer les présences par matière et par séance de cours, avec différents rôles utilisateurs (administrateur, coordinateur pédagogique, enseignant, étudiant, parent).
 
-## About Laravel
+## Fonctionnalités Implémentées
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Administration
+- Gestion des utilisateurs (création, modification, suppression)
+- Gestion des rôles (admin, coordinateur, enseignant, étudiant, parent)
+- Gestion des classes
+- Gestion des cours et types de cours
+- Gestion des années académiques et semestres
+- Gestion des statuts de séance et de présence
+- Assignation des parents aux étudiants
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Coordinateur Pédagogique
+- Gestion des séances de cours (création, modification, suppression)
+- Gestion de l'emploi du temps par classe
+- Saisie des présences pour les cours en e-learning et workshops
+- Justification des absences des étudiants
+- Assignation des étudiants aux classes
+- Visualisation des statistiques détaillées (taux de présence par étudiant/classe, volume de cours)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Enseignant
+- Consultation de l'emploi du temps personnel
+- Saisie des présences pour les séances de cours
+- Visualisation des étudiants "droppés" (taux de présence < 30%)
 
-## Learning Laravel
+### Étudiant
+- Consultation de l'emploi du temps
+- Visualisation des absences
+- Consultation de la note d'assiduité par matière
+- Notification en cas de "drop" d'une matière (taux de présence < 30%)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Parent
+- Consultation de l'emploi du temps des enfants
+- Visualisation des absences des enfants
+- Consultation des statistiques de présence
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Statistiques et Calculs
+- Calcul automatique de la note d'assiduité par étudiant et par matière
+- Calcul du taux de présence par étudiant, par matière et par classe
+- Génération de graphiques pour visualiser les taux de présence
+- Génération de graphiques pour visualiser le volume de cours dispensés
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Comment Tester le Projet
 
-## Laravel Sponsors
+### Prérequis
+- PHP 8.1 ou supérieur
+- Composer
+- MySQL ou MariaDB
+- Node.js et NPM
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Installation
 
-### Premium Partners
+1. Cloner le dépôt
+```bash
+git clone <url-du-depot>
+cd gestion-presence-projet
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. Installer les dépendances PHP
+```bash
+composer install
+```
 
-## Contributing
+3. Installer les dépendances JavaScript
+```bash
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. Copier le fichier d'environnement et configurer la base de données
+```bash
+cp .env.example .env
+```
+Modifier le fichier .env avec vos informations de base de données:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gestion_presence
+DB_USERNAME=votre_utilisateur
+DB_PASSWORD=votre_mot_de_passe
+```
 
-## Code of Conduct
+5. Générer la clé d'application
+```bash
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. Exécuter les migrations et les seeders
+```bash
+php artisan migrate --seed
+```
 
-## Security Vulnerabilities
+7. Compiler les assets
+```bash
+npm run dev
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+8. Démarrer le serveur
+```bash
+php artisan serve
+```
 
-## License
+L'application sera accessible à l'adresse http://localhost:8000
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Comptes de Test
+
+Après avoir exécuté les seeders, les comptes suivants seront disponibles pour tester l'application:
+
+- **Administrateur**:
+  - Email: admin@gmail.com
+  - Mot de passe: admin12345
+
+- **Coordinateur**:
+  - Email: maurice@gmail.com
+  - Mot de passe: maurice12345
+
+- **Enseignant**:
+  - Email: bernard@gmail.com
+  - Mot de passe: bernard12345
+
+- **Étudiant**:
+  - Email: etudiant@example.com
+  - Mot de passe: password
+
+- **Parent**:
+  - Email: parent@example.com
+  - Mot de passe: password
+
+## Test des Différentes Interfaces
+
+### Interface Administrateur
+
+1. Connectez-vous avec le compte administrateur
+2. Explorez le tableau de bord administrateur
+3. Testez la gestion des utilisateurs:
+   - Créez un nouvel utilisateur
+   - Modifiez un utilisateur existant
+   - Supprimez un utilisateur 
+4. Testez la gestion des classes:
+   - Créez une nouvelle classe
+   - Modifiez une classe existante
+   - Supprimez une classe 
+5. Testez la gestion des cours:
+   - Créez un nouveau cours
+   - Modifiez un cours existant
+   - Supprimez un cours 
+6. Testez la gestion des années académiques et semestres:
+   - Créez une nouvelle année académique
+   - Modifiez une année académique
+   - Supprimez une année académique
+   - Créez un nouveau 
+   - Modifiez un semestre
+   - Supprimez un semestre
+7. Testez l'assignation d'un parent à un étudiant
+
+### Interface Coordinateur
+
+1. Connectez-vous avec le compte coordinateur
+2. Explorez le tableau de bord coordinateur
+3. Testez la gestion de l'emploi du temps:
+   - Créez un nouvel emploi du temps pour une classe
+   - Modifiez un emploi du temps existant
+4. Testez la gestion des séances:
+   - Créez une nouvelle séance
+   - Modifiez une séance existante
+   - Reportez une séance
+   - Annulez(Supprimez) une séance
+5. Testez la saisie des présences:
+   - Sélectionnez une séance
+   - Saisissez les présences pour les étudiants
+6. Testez la justification des absences:
+   - Consultez la liste des absences
+   - Justifiez une absence
+7. Testez l'assignation d'un étudiant à une classe
+8. Explorez les statistiques détaillées
+
+### Interface Enseignant
+
+1. Connectez-vous avec le compte enseignant
+2. Explorez le tableau de bord enseignant
+3. Consultez l'emploi du temps personnel
+4. Testez la saisie des présences:
+   - Sélectionnez une séance
+   - Saisissez les présences pour les étudiants
+5. Vérifiez les notifications d'étudiants "droppés"
+
+### Interface Étudiant
+
+1. Connectez-vous avec le compte étudiant
+2. Explorez le tableau de bord étudiant
+3. Consultez l'emploi du temps
+4. Consultez la liste des absences
+5. Consultez la note d'assiduité par matière
+6. Vérifiez les notifications de "drop" de matière
+
+### Interface Parent
+
+1. Connectez-vous avec le compte parent
+2. Explorez le tableau de bord parent
+3. Consultez l'emploi du temps des enfants
+4. Consultez la liste des absences des enfants
+5. Consultez les statistiques de présence
+
+## Design Responsive
+
+L'application est entièrement responsive et s'adapte à tous les types d'appareils (ordinateurs de bureau, tablettes, smartphones). Les interfaces utilisateur ont été optimisées pour offrir une expérience utilisateur fluide quelle que soit la taille de l'écran.
+
+### Caractéristiques du design responsive:
+
+- **Menu Burger Responsive**: Sur les appareils mobiles et tablettes, la navigation principale se transforme en un menu burger fluide et accessible, offrant une expérience utilisateur optimale.
+- **Mise en page adaptative**: Les éléments de l'interface s'ajustent automatiquement en fonction de la taille de l'écran.
+- **Tableaux responsifs**: Les tableaux de données se transforment en affichage en liste sur les petits écrans pour une meilleure lisibilité.
+- **Menus adaptés**: La navigation est optimisée pour les écrans tactiles sur les appareils mobiles.
+- **Formulaires flexibles**: Les formulaires s'adaptent à la largeur de l'écran pour faciliter la saisie des données.
+- **Boutons et contrôles tactiles**: Les éléments interactifs sont dimensionnés pour être facilement utilisables sur les écrans tactiles.
+- **Animations fluides**: Les transitions et animations du menu burger et des éléments interactifs sont optimisées pour offrir une expérience utilisateur fluide.
+
+## Architecture du Projet
+
+Le projet suit une architecture MVC (Modèle-Vue-Contrôleur) avec une séparation claire des responsabilités:
+
+### Modèles
+Les modèles représentent les entités de la base de données et leurs relations:
+- User: utilisateur du système
+- Role: rôle de l'utilisateur (admin, coordinateur, enseignant, étudiant, parent)
+- Etudiant, Enseignant, Parent, Coordinateur: profils spécifiques liés aux utilisateurs
+- Classe: classe d'étudiants
+- Matiere: matière enseignée
+- Cours: cours dispensé
+- TypeCours: type de cours (présentiel, e-learning, workshop)
+- Seance: séance de cours
+- StatutSeance: statut d'une séance (planifiée, annulée, reportée)
+- Presence: présence d'un étudiant à une séance
+- StatutPresence: statut de présence (présent, absent, retard)
+- JustificationAbsence: justification d'une absence
+- AnneeAcademique: année académique
+- Semestre: semestre d'une année académique
+- HistoriqueReport: historique des reports de séances
+
+### Contrôleurs
+Les contrôleurs gèrent les requêtes HTTP et coordonnent les interactions:
+- AdminController: gestion des fonctionnalités administrateur
+- CoordinateurController: gestion des fonctionnalités coordinateur
+- EnseignantController: gestion des fonctionnalités enseignant
+- EtudiantController: gestion des fonctionnalités étudiant
+- ParentController: gestion des fonctionnalités parent
+
+### Services
+Les services encapsulent la logique métier:
+- UserService: gestion des utilisateurs
+- RoleService: gestion des rôles
+- EtudiantService: gestion des étudiants
+- EnseignantService: gestion des enseignants
+- ParentService: gestion des parents
+- SeanceService: gestion des séances
+- PresenceService: gestion des présences
+- StatistiqueService: calcul des statistiques
+- ClasseService: gestion des classes
+- CoursService: gestion des cours
+- AnneeAcademiqueService: gestion des années académiques
+- SemestreService: gestion des semestres
+
+### Repositories
+Les repositories gèrent l'accès aux données:
+- EtudiantRepository
+- PresenceRepository
+- SeanceRepository
+- RoleRepository
+- CoursRepository
+
+### Vues
+Les vues sont organisées par rôle utilisateur:
+- Admin: vues pour l'administrateur
+- Coordinateur: vues pour le coordinateur
+- Enseignant: vues pour l'enseignant
+- Etudiant: vues pour l'étudiant
+- Parent: vues pour le parent

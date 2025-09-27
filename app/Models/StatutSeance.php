@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class StatutSeance extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'nom_seance'
+        'nom_statut_seance',
     ];
+
     public function seances()
     {
         return $this->hasMany(Seance::class, 'statut_seance_id');
     }
-
 }

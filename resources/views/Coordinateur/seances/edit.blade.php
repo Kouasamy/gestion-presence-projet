@@ -78,7 +78,7 @@
                     <div>
                         <label class="block text-sm mb-1">Type de cours</label>
                         <select name="type_cours_id" class="form-select w-full bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:border-[#E61845] focus:ring focus:ring-[#E61845] focus:ring-opacity-50" required>
-                            @foreach ($types as $type)
+                            @foreach ($typesCours as $type)
                                 <option value="{{ $type->id }}"
                                     {{ $seance->type_cours_id == $type->id ? 'selected' : '' }}>
                                     {{ $type->nom_type_cours }}
@@ -94,7 +94,7 @@
                             @foreach ($statutsSeance as $statut)
                                 <option value="{{ $statut->id }}"
                                         {{ $seance->statut_seance_id == $statut->id ? 'selected' : '' }}>
-                                    {{ $statut->nom_seance }}
+                                    {{ $statut->nom_statut_seance }}
                                 </option>
                             @endforeach
                         </select>

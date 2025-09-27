@@ -13,10 +13,21 @@ return new class extends Migration
     {
         Schema::create('justification_absences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('presence_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('presence_id');
             $table->string('motif');
             $table->date('date_justification');
+            $table->string('document_path')->nullable();
+            $table->unsignedBigInteger('validee_par')->nullable();
             $table->timestamps();
+
+            $table->index('presence_id');
+            $table->index('validee_par');
+        });
+
+        // Ajouter les contraintes de clés étrangères après la création des tables
+        Schema::table('justification_absences', function (Blueprint $table) {
+            $table->foreign('presence_id')->references('id')->on('presences')->onDelete('cascade');
+            $table->foreign('validee_par')->references('id')->on('coordinateurs')->onDelete('set null');
         });
     }
 

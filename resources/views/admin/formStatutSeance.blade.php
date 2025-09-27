@@ -34,14 +34,28 @@
         <form action="{{ route('admin.statut-seances.store') }}" method="POST">
             @csrf
             <div>
-                <label for="nom_seance" class="form-label">Nom du statut de séance</label>
+                <label for="nom_statut_seance" class="form-label">Nom du statut de séance</label>
                 <input type="text"
-                       name="nom_seance"
-                       id="nom_seance"
+                       name="nom_statut_seance"
+                       id="nom_statut_seance"
                        class="form-input"
                        placeholder="Entrez le nom du statut"
-                       value="{{ old('nom_seance') }}"
+                       value="{{ old('nom_statut_seance') }}"
                        required>
+            </div>
+
+            <div class="mt-4">
+                <label for="couleur" class="form-label">Couleur</label>
+                <input type="color"
+                       name="couleur"
+                       id="couleur"
+                       value="{{ old('couleur', '#3490dc') }}"
+                       required
+                       class="form-input h-10">
+
+                @error('couleur')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
             </div>
 
             <button type="submit" class="form-button">

@@ -7,7 +7,7 @@
     <div class="form-card">
         <div class="form-header">
             <h2 class="text-white text-xl">Justifier une absence</h2>
-            <a href="{{ route('coordinateur.seances.presences.form', $presence->seance_id) }}" class="text-white opacity-80 hover:opacity-100">
+            <a href="{{ route('coordinateur.presences.form', $presence->seance_id) }}" class="text-white opacity-80 hover:opacity-100">
                 Retour aux présences
                 <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -53,7 +53,7 @@
             </div>
         @endif
 
-        <form action="{{ route('coordinateur.justification.store', $presence->id) }}" method="POST" class="space-y-6" enctype="multipart/form-data">
+        <form action="{{ route('coordinateur.absences.justify', $presence->id) }}" method="POST" class="space-y-6" enctype="multipart/form-data">
             @csrf
 
             <div>

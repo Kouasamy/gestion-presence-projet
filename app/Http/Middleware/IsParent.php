@@ -15,7 +15,7 @@ class IsParent
      */
     public function handle(Request $request, Closure $next): Response
     {
-       if ($request->user() && $request->user()->role()->where('nom_role', 'parent')->exists()) {
+        if ($request->user() && $request->user()->role()->where('nom_role', 'parent')->exists()) {
             return $next($request);
         }
 

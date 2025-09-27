@@ -2,121 +2,140 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Etudiant;
-use Illuminate\Http\Request;
+use App\Services\ParentService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class ParentController extends Controller
 {
+    protected $parentService;
 
+    /**
+     * Constructeur avec injection des dépendances
+     */
+    public function __construct(ParentService $parentService)
+    {
+        $this->middleware('auth');
+        $this->middleware('isParent');
+        $this->middleware(function ($request, $next) {
+            try {
+                if (Auth::check() && Auth::user()->parent) {
+                    $data = $this->parentService->getStatistiquesEtNotifications(Auth::user()->parent->id);
+                    View::share('notifications', $data['notifications'] ?? collect([]));
+                } else {
+                    View::share('notifications', collect([]));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Erreur dans le middleware du ParentController: ' . $e->getMessage());
+                // Ne pas partager de notifications en cas d'erreur
+                View::share('notifications', collect([]));
+            }
+
+            return $next($request);
+        });
+
+        $this->parentService = $parentService;
+    }
+
+    /**
+     * Affiche le tableau de bord du parent
+     */
     public function dashboard()
     {
         $parent = Auth::user()->parent;
-        $notifications = collect();
 
-        $etudiant = null;
-        $totalAbsences = $justifiees = $nonJustifiees = $tauxPresence = 0;
-
-        if ($parent) {
-            $etudiants = $parent->etudiants()->with(['user', 'classes', 'presences.justificationAbsence'])->get();
-
-            foreach ($etudiants as $etudiant) {
-                // Statistiques
-                $presences = $etudiant->presences;
-                $absences = $presences->where('statut_presence_id', 2);
-
-                $justifiees = $absences->filter(fn($a) => $a->justificationAbsence)->count();
-                $nonJustifiees = $absences->filter(fn($a) => !$a->justificationAbsence)->count();
-                $totalAbsences = $justifiees + $nonJustifiees;
-
-                $totalPresences = $presences->count();
-                $tauxPresence = $totalPresences > 0
-                    ? (100 * ($totalPresences - $totalAbsences) / $totalPresences)
-                    : 100;
-
-                // Séances annulées => Notification
-                $droppedSeances = $etudiant->classes()
-                    ->with(['seances' => function ($query) {
-                        $query->where('statut_seance_id', 3);
-                    }, 'seances.matiere'])
-                    ->get()
-                    ->pluck('seances')
-                    ->flatten();
-
-                foreach ($droppedSeances as $seance) {
-                    $notifications->push([
-                        'nom' => "⚠️ Désinscrit de : " . $seance->matiere->nom_matiere,
-                        'taux' => $tauxPresence,
-                        'photo' => $etudiant->photo_path
-                            ? asset('storage/' . $etudiant->photo_path)
-                            : 'https://ui-avatars.com/api/?name=' . urlencode($etudiant->user->nom),
-                    ]);
-                }
-
-                // Drop automatique si taux < 30%
-                if ($tauxPresence < 30) {
-                    $notifications->push([
-                        'nom' => "❌ Votre enfant a été droppé pour faible présence",
-                        'taux' => $tauxPresence,
-                        'photo' => $etudiant->photo_path
-                            ? asset('storage/' . $etudiant->photo_path)
-                            : 'https://ui-avatars.com/api/?name=' . urlencode($etudiant->user->nom),
-                    ]);
-                }
-            }
+        if (! $parent) {
+            return view('parent.dashboardParent', [
+                'etudiants' => collect(),
+                'totalAbsences' => 0,
+                'justifiees' => 0,
+                'nonJustifiees' => 0,
+                'tauxPresence' => 0,
+            ]);
         }
 
-        return view('parent.dashboardParent', compact(
-            'notifications',
-            'etudiants',
-            'totalAbsences',
-            'justifiees',
-            'nonJustifiees',
-            'tauxPresence'
-        ));
+        $data = $this->parentService->getStatistiquesEtNotifications($parent->id);
+        // Supprimer les notifications car elles sont déjà partagées avec toutes les vues
+        unset($data['notifications']);
+
+        return view('parent.dashboardParent', $data);
     }
 
-
     /**
-     * Display the child's schedule (read-only).
+     * Affiche l'emploi du temps des enfants du parent connecté
      */
     public function emploiDuTemps()
     {
         $parent = Auth::user()->parent;
-        if (!$parent) {
+
+        if (! $parent) {
             return redirect()->route('parent.dashboard')->with('error', 'Aucun parent associé trouvé.');
         }
-        $etudiants = $parent->etudiants()->with(['classes.seances' => function ($query) {
-            $query->orderBy('date_seance')->orderBy('heure_debut');
-        }, 'classes.seances.matiere', 'classes.seances.enseignant.user', 'classes.seances.typeCours'])->get();
 
-        return view('parent.emploiDuTemps', compact('etudiants'));
+        $etudiants = $this->parentService->getEmploiDuTemps($parent->id);
+        $jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+
+        // Formater les données pour chaque étudiant
+        $etudiantsEmploiDuTemps = [];
+
+        foreach ($etudiants as $etudiant) {
+            $emploiDuTempsEtudiant = [];
+
+            foreach ($etudiant->classes as $classe) {
+                // Formater les séances pour cette classe
+                $emploiDuTempsClasse = [];
+
+                foreach ($classe->seances as $seance) {
+                    $date = \Carbon\Carbon::parse($seance->date_seance);
+                    $jour = ucfirst($date->locale('fr')->dayName);
+                    $heureDebut = \Carbon\Carbon::parse($seance->heure_debut);
+                    $periode = ($heureDebut->hour < 12) ? 'matin' : 'soir';
+
+                    $emploiDuTempsClasse[$jour][$periode] = [
+                        'id' => $seance->id,
+                        'cours' => $seance->matiere->nom_matiere,
+                        'enseignant' => $seance->enseignant->user->nom,
+                        'type' => $seance->typeCours->nom_type_cours,
+                        'heure_debut' => $seance->heure_debut,
+                        'heure_fin' => $seance->heure_fin,
+                        'statut_id' => $seance->statut_seance_id,
+                        'statut' => $seance->statutSeance ? $seance->statutSeance->nom_statut : 'Planifiée',
+                        'date_seance' => $seance->date_seance,
+                    ];
+                }
+
+                $emploiDuTempsEtudiant[] = [
+                    'classe' => $classe,
+                    'emploiDuTemps' => $emploiDuTempsClasse
+                ];
+            }
+
+            $etudiantsEmploiDuTemps[] = [
+                'etudiant' => $etudiant,
+                'emploiDuTemps' => $emploiDuTempsEtudiant
+            ];
+        }
+
+        // Récupérer la semaine en cours pour l'affichage
+        $maintenant = \Carbon\Carbon::now();
+        $debutSemaine = $maintenant->copy()->startOfWeek()->format('d/m/Y');
+        $finSemaine = $maintenant->copy()->endOfWeek()->format('d/m/Y');
+
+        return view('parent.emploiDuTemps', compact('etudiantsEmploiDuTemps', 'jours', 'debutSemaine', 'finSemaine'));
     }
 
     /**
-     *
+     * Affiche les absences des enfants du parent connecté
      */
     public function absences()
     {
         $parent = Auth::user()->parent;
-        if (!$parent) {
+
+        if (! $parent) {
             return redirect()->route('parent.dashboard')->with('error', 'Aucun parent associé trouvé.');
         }
-        $etudiants = $parent->etudiants()->with(['presences' => function ($query) {
-            $query->where('statut_presence_id', 2) // Assuming 2 is the ID for 'Absent'
-                ->with(['seance.matiere', 'seance.typeCours', 'justificationAbsence']);
-        }])->get();
 
-        $absencesData = $etudiants->map(function ($etudiant) {
-            $absencesJustifiees = $etudiant->presences->filter(fn($absence) => $absence->justificationAbsence !== null);
-            $absencesNonJustifiees = $etudiant->presences->filter(fn($absence) => $absence->justificationAbsence === null);
-
-            return [
-                'etudiant' => $etudiant,
-                'absencesJustifiees' => $absencesJustifiees,
-                'absencesNonJustifiees' => $absencesNonJustifiees,
-            ];
-        });
+        $absencesData = $this->parentService->getAbsences($parent->id);
 
         return view('parent.absences', compact('absencesData'));
     }

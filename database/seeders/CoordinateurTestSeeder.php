@@ -2,25 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
-use Illuminate\Database\Seeder;
 use App\Models\AnneeAcademique;
 use App\Models\Classe;
-use App\Models\Matiere;
-use App\Models\TypeCours;
-use App\Models\StatutSeance;
-use App\Models\User;
 use App\Models\Coordinateur;
 use App\Models\Enseignant;
 use App\Models\Etudiant;
-use App\Models\Parents;
-use App\Models\Seance;
-use App\Models\Presence;
-use App\Models\StatutPresence;
 use App\Models\JustificationAbsence;
+use App\Models\Matiere;
+use App\Models\Parents;
+use App\Models\Presence;
+use App\Models\Role;
+use App\Models\Seance;
+use App\Models\StatutPresence;
+use App\Models\StatutSeance;
+use App\Models\TypeCours;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class CoordinateurTestSeeder extends Seeder
 {
@@ -45,10 +43,10 @@ class CoordinateurTestSeeder extends Seeder
         $tp = TypeCours::firstOrCreate(['nom_type_cours' => 'TP']);
 
         // Statuts de séance
-        $statutPlanifiee = StatutSeance::firstOrCreate(['nom_seance' => 'Planifiée']);
-        $statutAnnulee = StatutSeance::firstOrCreate(['nom_seance' => 'Annulée']);
-        $statutReportee = StatutSeance::firstOrCreate(['nom_seance' => 'Reportée']);
-        $statutTerminee = StatutSeance::firstOrCreate(['nom_seance' => 'Terminée']);
+        $statutPlanifiee = StatutSeance::firstOrCreate(['nom_statut_seance' => 'programmée']);
+        $statutAnnulee = StatutSeance::firstOrCreate(['nom_statut_seance' => 'annulée']);
+        $statutReportee = StatutSeance::firstOrCreate(['nom_statut_seance' => 'reportée']);
+        $statutTerminee = StatutSeance::firstOrCreate(['nom_statut_seance' => 'terminée']);
 
         // Rôles
         $roleCoord = Role::firstOrCreate(['nom_role' => 'coordinateur']);
@@ -69,23 +67,23 @@ class CoordinateurTestSeeder extends Seeder
         $coord = Coordinateur::firstOrCreate(['user_id' => $userCoord->id]);
 
         // Enseignants
-        $enseignants = Enseignant::factory(3)->create()->each(function($ens) use ($roleEns) {
+        $enseignants = Enseignant::factory(3)->create()->each(function ($ens) use ($roleEns) {
             $ens->user->update(['role_id' => $roleEns->id]);
         });
 
         // Étudiants
-        $etudiants = Etudiant::factory(10)->create()->each(function($etu) use ($roleEtu) {
+        $etudiants = Etudiant::factory(10)->create()->each(function ($etu) use ($roleEtu) {
             $etu->user->update(['role_id' => $roleEtu->id]);
         });
 
         // Parents
-        $parents = Parents::factory(3)->create()->each(function($par) use ($rolePar) {
+        $parents = Parents::factory(3)->create()->each(function ($par) use ($rolePar) {
             $par->user->update(['role_id' => $rolePar->id]);
         });
 
         // Liaisons parent-étudiant (1 parent pour 3-4 étudiants)
         foreach ($parents as $i => $parent) {
-            $slice = $etudiants->slice($i*3, 3);
+            $slice = $etudiants->slice($i * 3, 3);
             $parent->etudiants()->sync($slice->pluck('id')->toArray());
         }
 
@@ -95,7 +93,7 @@ class CoordinateurTestSeeder extends Seeder
             $etudiant->classes()->attach($classe->id, [
                 'annee_academique_id' => $annee1->id,
                 'date_debut' => '2023-09-01',
-                'date_fin' => null
+                'date_fin' => null,
             ]);
         }
 
@@ -140,7 +138,6 @@ class CoordinateurTestSeeder extends Seeder
                     'etudiant_id' => $etudiant->id,
                     'statut_presence_id' => $statut->id,
                     'coordinateur_id' => $coord->id,
-                    'justification' => null
                 ]);
                 // 1/4 des absences justifiées
                 if ($statut->id == $statutAbsent->id && rand(0, 3) == 0) {
@@ -148,6 +145,7 @@ class CoordinateurTestSeeder extends Seeder
                         'presence_id' => $presence->id,
                         'motif' => 'Maladie',
                         'date_justification' => now(),
+                        'document_path' => null,
                     ]);
                 }
             }

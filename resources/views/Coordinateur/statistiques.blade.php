@@ -24,7 +24,7 @@
                             <div class="flex flex-wrap gap-4">
                                 <div class="flex-1 min-w-[200px]">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Année académique</label>
-                                    <select name="annee" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
+                                    <select id="annee" name="annee" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
                                         <option value="">Toutes les années</option>
                                         @foreach($annees as $annee)
                                             <option value="{{ $annee->id }}" {{ request('annee') == $annee->id ? 'selected' : '' }}>
@@ -35,10 +35,12 @@
                                 </div>
                                 <div class="flex-1 min-w-[200px]">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
-                                    <select name="semestre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
+                                    <select id="semestre" name="semestre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-900">
                                         <option value="">Tous les semestres</option>
                                         @foreach($semestres as $semestre)
-                                            <option value="{{ $semestre->id }}" {{ request('semestre') == $semestre->id ? 'selected' : '' }}>
+                                            <option value="{{ $semestre->id }}"
+                                                {{ request('semestre') == $semestre->id ? 'selected' : '' }}
+                                                data-annee="{{ $semestre->annees_academiques_id }}">
                                                 {{ $semestre->nom}}
                                             </option>
                                         @endforeach
@@ -46,7 +48,7 @@
                                 </div>
                                 <div class="flex-1 min-w-[200px]">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Classe</label>
-                                    <select name="classe" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-800">
+                                    <select id="classe" name="classe" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white text-gray-800">
                                         <option value="">Toutes les classes</option>
                                         @foreach($classes as $classe)
                                             <option value="{{ $classe->id }}" {{ request('classe') == $classe->id ? 'selected' : '' }}>
@@ -123,6 +125,50 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des filtres
+    const anneeSelect = document.getElementById('annee');
+    const semestreSelect = document.getElementById('semestre');
+    const classeSelect = document.getElementById('classe');
+    const filterForm = document.getElementById('filterForm');
+
+    // Fonction pour filtrer les semestres en fonction de l'année académique sélectionnée
+    function filterSemestres() {
+        const anneeId = anneeSelect.value;
+
+        // Masquer tous les semestres
+        Array.from(semestreSelect.options).forEach(option => {
+            const optionAnneeId = option.getAttribute('data-annee');
+
+            if (anneeId === '' || option.value === '' || optionAnneeId === anneeId) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Si le semestre actuellement sélectionné n'est pas visible, sélectionner "Tous les semestres"
+        const selectedOption = semestreSelect.options[semestreSelect.selectedIndex];
+        if (selectedOption.style.display === 'none') {
+            semestreSelect.value = '';
+        }
+    }
+
+    // Soumettre le formulaire automatiquement lors du changement de filtre
+    function submitForm() {
+        filterForm.submit();
+    }
+
+    // Ajouter les écouteurs d'événements
+    anneeSelect.addEventListener('change', function() {
+        filterSemestres();
+        submitForm();
+    });
+
+    semestreSelect.addEventListener('change', submitForm);
+    classeSelect.addEventListener('change', submitForm);
+
+    // Filtrer les semestres au chargement de la page
+    filterSemestres();
 
     // Configuration globale Chart.js
     Chart.defaults.font.family = "'Inter', 'system-ui', sans-serif";

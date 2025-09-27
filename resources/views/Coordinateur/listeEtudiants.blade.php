@@ -36,7 +36,7 @@
                     </div>
                 @else
                     <div class="overflow-x-auto">
-                        <table class="custom-table">
+                        <table class="custom-table w-full coordinateur-etudiants-table">
                             <thead>
                                 <tr>
                                     <th>Photo</th>
@@ -44,36 +44,61 @@
                                     <th>Email</th>
                                     <th>Classe(s)</th>
                                     <th>Taux de présence</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($etudiants as $etudiant)
                                     <tr>
-                                        <td>
-                                            <img src="{{ $etudiant->photo_path ?? '/default-avatar.png' }}" alt="Photo" class="w-10 h-10 rounded-full object-cover">
+                                        <td data-label="Photo">
+                                            <img src="{{ $etudiant->user->photo_url }}"
+                                                 alt="Photo de {{ $etudiant->user->nom }}"
+                                                 class="student-photo">
                                         </td>
-                                        <td>{{ $etudiant->user->nom }}</td>
-                                        <td>{{ $etudiant->user->email }}</td>
-                                        <td>
+                                        <td data-label="Nom">
+                                            <div class="font-medium">{{ $etudiant->user->nom }}</div>
+                                        </td>
+                                        <td data-label="Email">{{ $etudiant->user->email }}</td>
+                                        <td data-label="Classe(s)" class="class-list">
                                             @if($etudiant->classes && $etudiant->classes->count())
-                                                <ul class="list-disc pl-4">
+                                                <div class="space-y-2">
                                                 @foreach($etudiant->classes as $classe)
-                                                    <li>
-                                                        {{ $classe->nom_classe }}
-                                                        <form method="POST" action="{{ route('coordinateur.etudiants.desinscrireClasse', ['etudiant' => $etudiant->id, 'classe' => $classe->id]) }}" style="display:inline;" onsubmit="return confirm('Confirmer la désinscription de cette classe ?');">
+                                                    <div class="class-item">
+                                                        <span>{{ $classe->nom_classe }}</span>
+                                                        <form method="POST" action="{{ route('coordinateur.etudiants.desinscrireClasse', ['etudiant' => $etudiant->id, 'classe' => $classe->id]) }}"
+                                                              onsubmit="return confirm('Confirmer la désinscription de cette classe ?');">
                                                             @csrf
-                                                            <button type="submit" class="text-red-600 hover:underline ml-2" title="Désinscrire">&times;</button>
+                                                            <button type="submit" class="remove-class-btn" title="Désinscrire">&times;</button>
                                                         </form>
-                                                    </li>
+                                                    </div>
                                                 @endforeach
-                                                </ul>
+                                                </div>
                                             @else
-                                                -
+                                                <span class="text-gray-400">Aucune classe</span>
                                             @endif
                                         </td>
-                                        <td>{{ $etudiant->taux_presence ?? '-' }}%</td>
-                                        <td>
-                                            <a href="{{ route('coordinateur.etudiants.formAssignerClasse', $etudiant->id) }}" class="custom-button">Assigner à une classe</a>
+                                        <td data-label="Taux de présence">
+                                            @php
+                                                $taux = $etudiant->taux_presence ?? 0;
+                                                $class = '';
+                                                if ($taux >= 70) {
+                                                    $class = 'presence-high';
+                                                } elseif ($taux >= 30) {
+                                                    $class = 'presence-medium';
+                                                } else {
+                                                    $class = 'presence-low';
+                                                }
+                                            @endphp
+                                            <span class="presence-rate {{ $class }}">
+                                                {{ $taux }}%
+                                            </span>
+                                        </td>
+                                        <td data-label="Actions">
+                                            <a href="{{ route('coordinateur.etudiants.formAssignerClasse', $etudiant->id) }}"
+                                               class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all flex items-center justify-center gap-2 w-full text-center">
+                                                <i class="fas fa-plus-circle"></i>
+                                                <span>Assigner classe</span>
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -98,4 +123,4 @@ function toggleAssignForm(etudiantId) {
     }
 }
 </script>
-@endsection 
+@endsection

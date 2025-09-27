@@ -31,7 +31,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.roles.store') }}" method="POST">
+        <form action="{{ route('admin.role.store') }}" method="POST">
             @csrf
             <div>
                 <label for="nom_role" class="form-label">Nom du rôle</label>

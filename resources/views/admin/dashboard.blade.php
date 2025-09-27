@@ -13,10 +13,17 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.cours.index') }}" style="text-decoration: none;">
+    <a href="{{ route('admin.matieres.index') }}" style="text-decoration: none;">
         <div class="card-placeholder">
             <i class="fa-solid fa-book-open card-icon"></i>
-            <div class="card-label">Gestion cours</div>
+            <div class="card-label">Gestion matières</div>
+        </div>
+    </a>
+
+    <a href="{{ route('admin.types-cours.index') }}" style="text-decoration: none;">
+        <div class="card-placeholder">
+            <i class="fa-solid fa-tags card-icon"></i>
+            <div class="card-label">Gestion types de cours</div>
         </div>
     </a>
 

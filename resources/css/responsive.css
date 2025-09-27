@@ -1,0 +1,631 @@
+/* Responsive CSS for all interfaces */
+
+/* Burger Menu Styles */
+.burger-menu-button {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1000;
+}
+
+.burger-menu-button span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #202149;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.burger-menu-button[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.burger-menu-button[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-menu-button[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: #202149;
+    z-index: 999;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding: 60px 20px 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-menu.open {
+    left: 0;
+}
+
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-menu ul li {
+    margin-bottom: 15px;
+}
+
+.mobile-menu ul li a {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.mobile-menu ul li a:hover,
+.mobile-menu ul li a.active {
+    background-color: #E61845;
+}
+
+.mobile-menu ul li a i {
+    margin-right: 15px;
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.mobile-menu-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.mobile-menu-header img {
+    width: 120px;
+    height: auto;
+}
+
+body.menu-open {
+    overflow: hidden;
+}
+
+/* Base responsive styles */
+@media (max-width: 1024px) {
+    /* General adjustments */
+    body {
+        font-size: 14px;
+    }
+
+    .container {
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Improve nav menu container width */
+    .nav-menu-container {
+        min-width: 350px;
+    }
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+    /* Burger menu display */
+    .burger-menu-button {
+        display: flex;
+    }
+
+    .nav-menu {
+        display: none;
+    }
+
+    /* Header adjustments */
+    .header {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px 10px;
+    }
+
+    .header-icons {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Dashboard cards */
+    .cards-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 15px;
+    }
+
+    .card-placeholder {
+        width: 100%;
+        height: 130px;
+    }
+
+    .card-placeholder .card-icon {
+        font-size: 60px;
+    }
+
+    .card-label {
+        font-size: 16px;
+    }
+
+    /* Tables */
+    .custom-table {
+        font-size: 13px;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        padding: 12px 15px;
+    }
+
+    /* Forms */
+    .form-container {
+        width: 100%;
+        max-width: 500px;
+        padding: 30px;
+        height: auto;
+    }
+
+    .form-card {
+        padding: 30px;
+    }
+
+    /* Buttons */
+    .custom-button {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    /* Footer */
+    .footer {
+        position: relative;
+    }
+
+    /* Flex direction for action buttons */
+    .flex.gap-2 {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Table actions */
+    td .flex.gap-2 {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    /* Improve header title and actions layout */
+    .flex.justify-between.items-center {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 640px) {
+    /* Header adjustments */
+    .logo-icon {
+        width: 100px;
+        height: 35px;
+    }
+
+    .nav-menu ul {
+        gap: 5px;
+    }
+
+    .nav-menu ul li {
+        padding: 5px 10px;
+    }
+
+    /* Dashboard cards */
+    .cards-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tables */
+    .overflow-x-auto {
+        margin: 0 -15px;
+        padding: 0 15px;
+        width: calc(100% + 30px);
+    }
+
+    .custom-table {
+        font-size: 12px;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        padding: 10px;
+    }
+
+    /* Make tables responsive */
+    .custom-table thead {
+        display: none;
+    }
+
+    .custom-table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        text-align: right;
+        border-bottom: 1px solid #eee;
+    }
+
+    .custom-table tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-align: left;
+        color: #333;
+        flex: 1;
+        padding-right: 10px;
+    }
+
+    .custom-table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    /* Improve action buttons in tables */
+    .custom-table td[data-label="Actions"] {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .custom-table td[data-label="Actions"]:before {
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+
+    .custom-table td[data-label="Actions"] .flex.gap-2,
+    .custom-table td[data-label="Actions"] form,
+    .custom-table td[data-label="Actions"] a,
+    .custom-table td[data-label="Actions"] button {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .custom-table td[data-label="Actions"] .custom-button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    /* Forms */
+    .form-container {
+        padding: 20px;
+    }
+
+    .form-card {
+        padding: 20px;
+    }
+
+    .grid.grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Buttons */
+    .custom-button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Header title and actions */
+    .flex.justify-between.items-center {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .flex.justify-between.items-center .flex.gap-2 {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Improve filter forms */
+    .flex.justify-between.items-center form {
+        width: 100%;
+    }
+
+    .flex.justify-between.items-center form select,
+    .flex.justify-between.items-center form input {
+        flex: 1;
+    }
+
+    /* Coordinateur specific */
+    .coordinateur-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .coordinateur-filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .coordinateur-filter-item {
+        width: 100%;
+        text-align: center;
+    }
+
+    .coordinateur-action-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Enseignant specific */
+    .enseignant-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Specific adjustments for tables */
+@media (max-width: 640px) {
+    /* Admin listeCours */
+    .admin-cours-table td:nth-of-type(1):before { content: "Nom du cours"; }
+    .admin-cours-table td:nth-of-type(2):before { content: "Type de cours"; }
+    .admin-cours-table td:nth-of-type(3):before { content: "Description"; }
+    .admin-cours-table td:nth-of-type(4):before { content: "Actions"; }
+
+    /* Admin listeTypesCours */
+    .admin-types-cours-table td:nth-of-type(1):before { content: "Nom du type"; }
+    .admin-types-cours-table td:nth-of-type(2):before { content: "Description"; }
+    .admin-types-cours-table td:nth-of-type(3):before { content: "Actions"; }
+
+    /* Admin listeClasse */
+    .admin-classe-table td:nth-of-type(1):before { content: "Nom de la classe"; }
+    .admin-classe-table td:nth-of-type(2):before { content: "Effectif"; }
+    .admin-classe-table td:nth-of-type(3):before { content: "Actions"; }
+
+    /* Coordinateur listeEtudiants */
+    .coordinateur-etudiants-table td:nth-of-type(1):before { content: "Photo"; }
+    .coordinateur-etudiants-table td:nth-of-type(2):before { content: "Nom"; }
+    .coordinateur-etudiants-table td:nth-of-type(3):before { content: "Email"; }
+    .coordinateur-etudiants-table td:nth-of-type(4):before { content: "Classes"; }
+    .coordinateur-etudiants-table td:nth-of-type(5):before { content: "Taux de présence"; }
+    .coordinateur-etudiants-table td:nth-of-type(6):before { content: "Actions"; }
+
+    /* Enseignant listeSeances */
+    .enseignant-seances-table td:nth-of-type(1):before { content: "Date"; }
+    .enseignant-seances-table td:nth-of-type(2):before { content: "Horaire"; }
+    .enseignant-seances-table td:nth-of-type(3):before { content: "Matière"; }
+    .enseignant-seances-table td:nth-of-type(4):before { content: "Classe"; }
+    .enseignant-seances-table td:nth-of-type(5):before { content: "Statut"; }
+    .enseignant-seances-table td:nth-of-type(6):before { content: "Actions"; }
+
+    /* Improve table cell alignment */
+    .custom-table td[data-label] {
+        text-align: left;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .custom-table td[data-label]:before {
+        flex: 0 0 100%;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Special handling for photo cells */
+    .custom-table td[data-label="Photo"] {
+        justify-content: center;
+    }
+
+    .custom-table td[data-label="Photo"]:before {
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Special handling for action cells */
+    .custom-table td[data-label="Actions"] {
+        flex-direction: column;
+    }
+
+    .custom-table td[data-label="Actions"] .flex,
+    .custom-table td[data-label="Actions"] form,
+    .custom-table td[data-label="Actions"] a,
+    .custom-table td[data-label="Actions"] button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    /* Special handling for class list */
+    .class-list {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .class-item {
+        width: 100%;
+    }
+}
+
+/* Specific adjustments for forms */
+@media (max-width: 640px) {
+    .form-wrapper {
+        padding: 10px;
+        min-height: auto;
+    }
+
+    .form-container form {
+        margin-top: 30px;
+        gap: 15px;
+    }
+
+    .form-container button {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .student-list-link {
+        position: static;
+        margin-top: 10px;
+        display: inline-block;
+    }
+
+    /* Improve form layout */
+    .form-container input[type="text"],
+    .form-container input[type="email"],
+    .form-container input[type="file"],
+    .form-container input[type="password"],
+    .form-container select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+/* Emploi du temps responsive */
+@media (max-width: 768px) {
+    .emploi-du-temps-container {
+        overflow-x: auto;
+    }
+
+    .emploi-du-temps-table {
+        min-width: 700px;
+    }
+}
+
+/* Notification dropdown responsive */
+@media (max-width: 640px) {
+    .notification-dropdown-content {
+        width: 300px;
+        right: -100px;
+    }
+}
+
+/* Responsive charts */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+
+    .chart-legend {
+        flex-direction: column;
+    }
+}
+
+/* Fix for fixed footer on mobile */
+@media (max-height: 700px) {
+    .footer {
+        position: relative;
+    }
+}
+
+/* Additional responsive improvements */
+@media (max-width: 640px) {
+    /* Improve spacing in list views */
+    .p-6 {
+        padding: 15px;
+    }
+
+    /* Improve button spacing in mobile */
+    .custom-button {
+        margin-bottom: 5px;
+        padding: 10px 15px;
+    }
+
+    /* Improve table row spacing */
+    .custom-table tbody tr {
+        margin-bottom: 20px;
+    }
+
+    /* Improve filter form layout */
+    form.flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    form.flex.gap-2 select,
+    form.flex.gap-2 input,
+    form.flex.gap-2 button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Improve header actions layout */
+    .flex.justify-between.items-center .flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .flex.justify-between.items-center .flex.gap-2 a,
+    .flex.justify-between.items-center .flex.gap-2 button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Improve table cell content alignment */
+    .custom-table td span.inline-flex,
+    .custom-table td span.presence-rate {
+        margin: 0 auto;
+    }
+}
+
+/* Medium-sized screens adjustments */
+@media (min-width: 641px) and (max-width: 768px) {
+    /* Improve action buttons layout */
+    td .flex.gap-2 {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    td .flex.gap-2 a,
+    td .flex.gap-2 button,
+    td .flex.gap-2 form {
+        flex: 0 0 48%;
+        margin-bottom: 5px;
+    }
+
+    /* Improve header actions layout */
+    .flex.justify-between.items-center .flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    .flex.justify-between.items-center .flex.gap-2 a,
+    .flex.justify-between.items-center .flex.gap-2 button {
+        flex: 0 0 48%;
+    }
+}

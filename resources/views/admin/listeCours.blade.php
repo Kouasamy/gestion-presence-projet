@@ -11,9 +11,14 @@
                     <h2 class="text-xl font-semibold text-gray-800">
                         📚 Liste des Cours
                     </h2>
-                    <a href="{{ route('admin.cours.create') }}" class="custom-button">
-                        <i class="fas fa-plus mr-2"></i> Ajouter un cours
-                    </a>
+                    <div class="flex gap-2">
+                        <a href="{{ route('admin.cours.create') }}" class="custom-button">
+                            <i class="fas fa-plus mr-2"></i> Ajouter un cours
+                        </a>
+                        <a href="{{ route('admin.types-cours.index') }}" class="custom-button bg-purple-500 hover:bg-purple-600">
+                            <i class="fas fa-list mr-2"></i> Voir les types de cours
+                        </a>
+                    </div>
                 </div>
 
                 @if(session('success'))
@@ -23,32 +28,32 @@
                 @endif
 
                 <div class="overflow-x-auto">
-                    <table class="custom-table">
+                    <table class="custom-table w-full admin-cours-table">
                         <thead>
                             <tr>
-
                                 <th>Nom du cours</th>
                                 <th>Type de cours</th>
+                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($matieres as $matiere)
+                            @foreach($cours as $c)
                                 <tr>
-
-                                    <td>{{ $matiere->nom_matiere }}</td>
-                                    <td>
+                                    <td data-label="Nom du cours">{{ $c->matiere->nom_matiere }}</td>
+                                    <td data-label="Type de cours">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ $matiere->type_cours->nom_type_cours ?? 'Non défini' }}
+                                            {{ $c->typeCours->nom_type_cours ?? 'Non défini' }}
                                         </span>
                                     </td>
-                                    <td class="flex gap-2">
-                                        <a href="{{ route('admin.cours.edit', $matiere->id) }}"
+                                    <td data-label="Description">{{ Str::limit($c->description, 50) }}</td>
+                                    <td data-label="Actions" class="flex gap-2">
+                                        <a href="{{ route('admin.cours.edit', $c->id) }}"
                                            class="custom-button bg-yellow-500 hover:bg-yellow-600">
                                             <i class="fas fa-edit mr-2"></i>
                                             Modifier
                                         </a>
-                                        <form action="{{ route('admin.cours.destroy', $matiere->id) }}"
+                                        <form action="{{ route('admin.cours.destroy', $c->id) }}"
                                               method="POST"
                                               class="inline-block"
                                               onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')">

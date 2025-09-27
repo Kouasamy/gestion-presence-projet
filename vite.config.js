@@ -6,10 +6,14 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/login.css',
                 'resources/css/style.css',
-                'resources/js/app.js'
+                'resources/css/responsive.css',
+                'resources/js/app.js',
+                'resources/js/responsive-menu.js'
             ],
             refresh: true,
         }),
     ],
 });
+

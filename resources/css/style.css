@@ -317,11 +317,72 @@
 
 .custom-table th,
 .custom-table td {
-    padding: 12px 15px;
+    padding: 20px 25px;
 }
 
 .custom-table tbody tr {
     border-bottom: 1px solid #dddddd;
+    height: 70px;
+}
+
+/* Student list styles */
+.student-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f3f4f6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.presence-rate {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+}
+
+.presence-high {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.presence-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.presence-low {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.class-list {
+    max-width: 300px;
+}
+
+.class-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: #f3f4f6;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.remove-class-btn {
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
 }
 
 .custom-table tbody tr:nth-of-type(even) {

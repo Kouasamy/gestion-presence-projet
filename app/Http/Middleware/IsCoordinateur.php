@@ -15,7 +15,7 @@ class IsCoordinateur
      */
     public function handle(Request $request, Closure $next): Response
     {
-         if ($request->user() && $request->user()->role()->where('nom_role', 'coordinateur')->exists()) {
+        if ($request->user() && $request->user()->role()->where('nom_role', 'coordinateur')->exists()) {
             return $next($request);
         }
 

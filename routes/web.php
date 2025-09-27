@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\CoordinateurController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CoordinateurController;
 use App\Http\Controllers\EnseignantController;
 use App\Http\Controllers\EtudiantController;
 use App\Http\Controllers\ParentController;
@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     if (Auth::check()) {
         $role = Auth::user()->role->nom_role ?? null;
+
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),
             'etudiant' => redirect()->route('etudiant.dashboard'),
@@ -22,6 +23,7 @@ Route::get('/', function () {
             default => redirect('/login'),
         };
     }
+
     return redirect()->route('login');
 });
 
@@ -54,22 +56,15 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
         Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
     });
 
-    // Gestion des cours et types de cours
-    Route::prefix('cours')->name('cours.')->group(function () {
-        Route::get('/', [AdminController::class, 'listeCours'])->name('index');
-        Route::get('/create', [AdminController::class, 'indexCours'])->name('create');
-        Route::post('/', [AdminController::class, 'storeCours'])->name('store');
-        Route::get('/{cours}/edit', [AdminController::class, 'editCours'])->name('edit');
-        Route::put('/{cours}', [AdminController::class, 'updateCours'])->name('update');
-        Route::delete('/{cours}', [AdminController::class, 'destroyCours'])->name('destroy');
 
-        // Types de cours
-        Route::prefix('types')->name('types.')->group(function () {
-            Route::post('/', [AdminController::class, 'storeTypeCours'])->name('store');
-            Route::get('/{type}/edit', [AdminController::class, 'editTypeCours'])->name('edit');
-            Route::put('/{type}', [AdminController::class, 'updateTypeCours'])->name('update');
-            Route::delete('/{type}', [AdminController::class, 'destroyTypeCours'])->name('destroy');
-        });
+    // Gestion des types de cours
+    Route::prefix('types-cours')->name('types-cours.')->group(function () {
+        Route::get('/', [AdminController::class, 'listeTypesCours'])->name('index');
+        Route::get('/create', [AdminController::class, 'createTypeCours'])->name('create');
+        Route::post('/', [AdminController::class, 'storeTypeCours'])->name('store');
+        Route::get('/{type}/edit', [AdminController::class, 'editTypeCours'])->name('edit');
+        Route::put('/{type}', [AdminController::class, 'updateTypeCours'])->name('update');
+        Route::delete('/{type}', [AdminController::class, 'destroyTypeCours'])->name('destroy');
     });
 
     // Gestion des classes
@@ -121,6 +116,16 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
         Route::put('/{semestre}', [AdminController::class, 'updateSemestre'])->name('update');
         Route::delete('/{semestre}', [AdminController::class, 'destroySemestre'])->name('destroy');
     });
+
+    // Gestion des matières
+    Route::prefix('matieres')->name('matieres.')->group(function () {
+        Route::get('/', [AdminController::class, 'listeMatieres'])->name('index');
+        Route::get('/create', [AdminController::class, 'createMatiere'])->name('create');
+        Route::post('/', [AdminController::class, 'storeMatiere'])->name('store');
+        Route::get('/{matiere}/edit', [AdminController::class, 'editMatiere'])->name('edit');
+        Route::put('/{matiere}', [AdminController::class, 'updateMatiere'])->name('update');
+        Route::delete('/{matiere}', [AdminController::class, 'destroyMatiere'])->name('destroy');
+    });
 });
 
 // Routes pour le coordinateur
@@ -130,18 +135,20 @@ Route::middleware(['auth', 'isCoordinateur'])->prefix('coordinateur')->name('coo
 
     // Gestion des séances
     Route::prefix('seances')->name('seances.')->group(function () {
-        Route::get('/', [CoordinateurController::class, 'index'])->name('index');
-        Route::get('/{seance}/edit', [CoordinateurController::class, 'edit'])->name('edit');
-        Route::put('/{seance}', [CoordinateurController::class, 'update'])->name('update');
-        Route::delete('/{seance}', [CoordinateurController::class, 'destroy'])->name('destroy');
+        Route::get('/', [CoordinateurController::class, 'indexSeances'])->name('index');
+        Route::get('/create', [CoordinateurController::class, 'createSeance'])->name('create');
+        Route::post('/', [CoordinateurController::class, 'storeSeance'])->name('store');
+        Route::get('/{seance}/edit', [CoordinateurController::class, 'editSeance'])->name('edit');
+        Route::put('/{seance}', [CoordinateurController::class, 'updateSeance'])->name('update');
+        Route::delete('/{seance}', [CoordinateurController::class, 'destroySeance'])->name('destroy');
 
         // Gestion des reports et annulations
         Route::post('/{seance}/reporter', [CoordinateurController::class, 'reporterSeance'])->name('reporter');
         Route::post('/{seance}/annuler', [CoordinateurController::class, 'annulerSeance'])->name('annuler');
     });
+
     // Statistiques
     Route::get('/statistiques', [CoordinateurController::class, 'statistiques'])->name('statistiques');
-
 
     // Gestion des présences
     Route::prefix('presences')->name('presences.')->group(function () {
@@ -199,14 +206,9 @@ Route::middleware(['auth', 'isParent'])->prefix('parent')->name('parent.')->grou
     Route::get('/absences', [ParentController::class, 'absences'])->name('absences');
 });
 
-
-
 // Routes pour les enseignants
 Route::middleware(['auth', 'isEnseignant'])->prefix('enseignant')->name('enseignant.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('enseignant.dashboardEnseignant');
-    })->name('dashboard');
-
+    Route::get('/dashboard', [EnseignantController::class, 'dashboard'])->name('dashboard');
     Route::get('/seances', [EnseignantController::class, 'listeSeances'])->name('listeSeances');
     Route::get('/seances/{seance}/presence', [EnseignantController::class, 'formulairePresence'])->name('formulairePresence');
     Route::post('/seances/{seance}/presence', [EnseignantController::class, 'enregistrerPresence'])->name('enregistrerPresence');
@@ -220,4 +222,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

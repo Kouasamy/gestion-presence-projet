@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('statut_seances', function (Blueprint $table) {
             $table->id();
-            $table->string('nom_seance')->unique();
+            $table->string('nom_statut_seance')->unique();
             $table->timestamps();
         });
     }
