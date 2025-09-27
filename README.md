@@ -114,20 +114,20 @@ Après avoir exécuté les seeders, les comptes suivants seront disponibles pour
   - Mot de passe: admin12345
 
 - **Coordinateur**:
-  - Email: maurice@gmail.com
-  - Mot de passe: maurice12345
+  - Email: kouakou@gmail.com
+  - Mot de passe: kouakou12345
 
 - **Enseignant**:
   - Email: bernard@gmail.com
   - Mot de passe: bernard12345
 
 - **Étudiant**:
-  - Email: etudiant@example.com
-  - Mot de passe: password
+  - Email: kouatekra@gmail.com
+  - Mot de passe: kouat12345
 
 - **Parent**:
-  - Email: parent@example.com
-  - Mot de passe: password
+  - Email: kouassi@gmail.com
+  - Mot de passe: kouassi12345
 
 ## Test des Différentes Interfaces
 
