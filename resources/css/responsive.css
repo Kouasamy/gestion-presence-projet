@@ -427,6 +427,42 @@ body.menu-open {
     .coordinateur-etudiants-table td:nth-of-type(5):before { content: "Taux de présence"; }
     .coordinateur-etudiants-table td:nth-of-type(6):before { content: "Actions"; }
 
+    /* Amélioration spécifique pour la liste des étudiants */
+    .coordinateur-etudiants-table td[data-label="Photo"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Photo"]:before {
+        margin-bottom: 10px;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Taux de présence"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Taux de présence"]:before {
+        margin-bottom: 10px;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Actions"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Actions"]:before {
+        margin-bottom: 10px;
+    }
+
+    .coordinateur-etudiants-table td[data-label="Actions"] .flex {
+        width: 100%;
+    }
+
     /* Enseignant listeSeances */
     .enseignant-seances-table td:nth-of-type(1):before { content: "Date"; }
     .enseignant-seances-table td:nth-of-type(2):before { content: "Horaire"; }

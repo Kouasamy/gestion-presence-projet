@@ -383,6 +383,27 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+/* Styles responsives pour la liste des classes */
+@media (max-width: 640px) {
+    .class-list {
+        max-width: 100%;
+    }
+
+    .class-item {
+        width: 100%;
+        padding: 8px 12px;
+    }
+
+    .class-item span {
+        max-width: 80%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .custom-table tbody tr:nth-of-type(even) {

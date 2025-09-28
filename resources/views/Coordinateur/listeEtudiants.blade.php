@@ -50,16 +50,16 @@
                             <tbody>
                                 @foreach($etudiants as $etudiant)
                                     <tr>
-                                        <td data-label="Photo">
+                                        <td data-label="Photo" class="text-center">
                                             <img src="{{ $etudiant->user->photo_url }}"
                                                  alt="Photo de {{ $etudiant->user->nom }}"
-                                                 class="student-photo">
+                                                 class="student-photo mx-auto">
                                         </td>
                                         <td data-label="Nom">
                                             <div class="font-medium">{{ $etudiant->user->nom }}</div>
                                         </td>
                                         <td data-label="Email">{{ $etudiant->user->email }}</td>
-                                        <td data-label="Classe(s)" class="class-list">
+                                        <td data-label="Classes" class="class-list">
                                             @if($etudiant->classes && $etudiant->classes->count())
                                                 <div class="space-y-2">
                                                 @foreach($etudiant->classes as $classe)
@@ -77,7 +77,7 @@
                                                 <span class="text-gray-400">Aucune classe</span>
                                             @endif
                                         </td>
-                                        <td data-label="Taux de présence">
+                                        <td data-label="Taux de présence" class="text-center">
                                             @php
                                                 $taux = $etudiant->taux_presence ?? 0;
                                                 $class = '';
@@ -89,16 +89,18 @@
                                                     $class = 'presence-low';
                                                 }
                                             @endphp
-                                            <span class="presence-rate {{ $class }}">
+                                            <span class="presence-rate {{ $class }} inline-block">
                                                 {{ $taux }}%
                                             </span>
                                         </td>
-                                        <td data-label="Actions">
-                                            <a href="{{ route('coordinateur.etudiants.formAssignerClasse', $etudiant->id) }}"
-                                               class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all flex items-center justify-center gap-2 w-full text-center">
-                                                <i class="fas fa-plus-circle"></i>
-                                                <span>Assigner classe</span>
-                                            </a>
+                                        <td data-label="Actions" class="text-center">
+                                            <div class="flex justify-center">
+                                                <a href="{{ route('coordinateur.etudiants.formAssignerClasse', $etudiant->id) }}"
+                                                   class="px-4 py-2 bg-[#202149] hover:bg-[#2c2d68] text-white rounded-lg transition-all flex items-center justify-center gap-2 w-full text-center">
+                                                    <i class="fas fa-plus-circle"></i>
+                                                    <span>Assigner classe</span>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -116,11 +118,30 @@
 <script>
 function toggleAssignForm(etudiantId) {
     const row = document.getElementById('assign-form-row-' + etudiantId);
-    if (row.style.display === 'none') {
-        row.style.display = '';
-    } else {
-        row.style.display = 'none';
+    if (row) {
+        if (row.style.display === 'none') {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
     }
 }
+
+// Amélioration de l'expérience mobile
+document.addEventListener('DOMContentLoaded', function() {
+    // S'assurer que les photos s'affichent correctement
+    const studentPhotos = document.querySelectorAll('.student-photo');
+    studentPhotos.forEach(photo => {
+        photo.addEventListener('error', function() {
+            this.src = 'https://ui-avatars.com/api/?name=Etudiant&background=random&color=fff';
+        });
+    });
+
+    // Améliorer l'affichage des taux de présence sur mobile
+    const presenceRates = document.querySelectorAll('.presence-rate');
+    presenceRates.forEach(rate => {
+        rate.classList.add('inline-block');
+    });
+});
 </script>
 @endsection
