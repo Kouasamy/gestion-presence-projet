@@ -1,4 +1,5 @@
-# Système de Gestion de Présence des Étudiants - IFRAN
+# Système de Gestion de Présence des Étudiants - IFRAN(INSTITUT FRANÇAIS DU NUMÉRIQUE )
+
 
 Ce projet est une application web développée pour digitaliser le relevé des présences des étudiants de l'IFRAN. L'application permet de gérer les présences par matière et par séance de cours, avec différents rôles utilisateurs (administrateur, coordinateur pédagogique, enseignant, étudiant, parent).
 
